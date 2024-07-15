@@ -1,0 +1,193 @@
+version: "3.1"
+
+nlu:
+- intent: greet
+  examples: |
+    - hi
+    - hey
+    - hello
+    - hi, my name is [John](user_name)
+    - hi i am [Alice](user_name)
+    - hello, i am [Bob](user_name)
+    - hi nice to meet you, i am [Francesco](user_name)
+    - hi digital assistant, i am [Giovanni](user_name)
+    - dine-smart bot, i am [Lucrezia](user_name)
+    - hello there
+    - good morning
+    - good evening
+    - good afternoon
+    - morning
+    - hey there
+    - let's go
+    - hey dude
+    - hey bot
+    - hello chatbot
+    - hi concierge
+    - hello friend
+    - hiya
+    - hello is anybody there
+    - hey ya
+    - greetings
+    - hi hi
+    - hi there
+    - hi pal!
+    - hello, how is it going
+    - here i am again
+    - haven't seen you for a while
+    - hi, what's up
+
+- intent: goodbye
+  examples: |
+    - cu
+    - good by
+    - cee you later
+    - good night
+    - bye
+    - goodbye
+    - have a nice day
+    - see you around
+    - bye bye
+    - see you later
+
+- intent: affirm
+  examples: |
+    - "yes"
+    - indeed
+    - of course
+    - that sounds good
+    - correct
+    - absolutely
+    - sure
+    - definitely
+    - yeah
+    - ok
+    - okay
+    - yep
+    - right
+    - sounds good to me
+
+- intent: deny
+  examples: |
+    - "no"
+    - never
+    - I don't think so
+    - don't like that
+    - no way
+    - not really
+    - nope
+    - definitely not
+    - no thanks
+    - I'm sorry, but no
+    - I don't want that
+    - don't think that's a good idea
+    - no, I changed my mind
+
+- intent: stop
+  examples: |
+    - stop
+    - end
+    - I don't want to talk to you
+    - please stop
+    - end this
+    - I want to stop
+    - enough
+    - I don't want to talk to you anymore
+    - stop talking
+    - stop the conversation
+    - I want you to stop
+    - stop right now
+    - I don't want to continue
+    - stop talking now
+    - shut up
+    - stop it
+    - be silent
+    - can you stop
+    - cancel
+    - i dont wanna tell you
+    - i don't intend giving you any information
+    - i will never tell you that
+    - i don't want to share that
+    - i don't want to tell you
+
+- intent: bot_challenge
+  examples: |
+    - are you a bot?
+    - are you a human?
+    - are you a real person?
+    - you're a bot?
+    - I know you're a bot
+    - i know you're not human
+    - i don't think you're a human
+    - are you a bot or a human?
+    - can you provide your credentials?
+    - are you a real person or a bot?
+    - is this conversation with a human or a bot?
+    - are you a machine?
+    - am I speaking with a robot?
+    - are you an AI?
+    - am I speaking with an artificial intelligence?
+    - you don't sound like a real human being
+    - it seems like I'm talking to a machine
+    - i am sure you are a bot
+    - i wanna know tour nature
+    - i am interested in knowing if you are a bot
+    - what are you exactly?
+    - who are you?
+    - surely you are not a human
+
+- intent: inform_location
+  examples: |
+    - in [Milan](location)
+    - near [Piazza Santa Maria Maggiore of Trento](location)
+    - close to [Parma](location)
+    - in the city of [Bologna](location)
+    - in the [center of Rome](location)
+    - in the [historic center of Florence](location)
+    - in the [old town of Verona](location)
+    - in the [city center of Naples](location)
+    - near [Piazza San Marco in Venice](location)
+    - pretty close to [Piazza del Duomo in Pisa](location)
+    - close to the [Leaning Tower of Pisa](location)
+    - in [Maranello](location)
+    - in [Piazza del Campo in Siena](location)
+
+- intent: inform_my_location
+  examples: |
+    - i am in [Milan](location)
+    - i think i am in [Via Pescara Bari](location)
+    - my gps says i am in [Via Cavour Trento](location)
+    - currently i am near [Piazza del Popolo in Ancona](location)
+    - google maps says i am near the [Duomo of Milan](location)
+    - my home is near [Piazza Barberini](location)
+    - i am at the office which is in [Piazza Federico di Svevia 4 in Bari](location)
+    - i am currently near [Piazza di Spagna in Rome](location)
+    - my home address is [Via del Corso 123 Rome Italy](location)
+    - I live in [Piazza Federico di Svevia 4 in Bari](location)
+    - I am staying in [via Franchino Gaffurio in Milan](location)
+    - I am somewhere around the church of [San Vitale in Ravenna](location)
+    - I am dining at a restaurant in [Via Cavour](location)
+    - I am shopping in the [city center](location)
+    - I am walking near the [Duomo](location)
+    - I am wandering around the [city center of Bologna](location)
+    - I just finished visiting the [Vatican Museums](location)
+    - I am on taxi to the [Reggia di Caserta](location)
+    - I am on a bus directed to the [Chiesa di San Giovanni Battista](location)
+    - I am at the [train station of Milan](location)
+    - I am at the [airport](location)
+    - I am leaving now the [museum](location)
+    - going to the [beach](location)
+    - just left the [Sistine Chapel](location)
+    - just finished lunch near [Piazza San Marco Venice](location)
+    - just going home in [via Bruxelles Altamura Bari](location)
+    - my address is [via Jacopo Rezia 9 Prolezza Como](location)
+    - [via Veneziani, 3 Ferrara](location)
+    - [via Luigi Serra Bologna](location) is where I live
+    - [Contrada Pretaro Francavilla al Mare](location) is my location
+    - [via Monte San Michele 17](location) is the address of my hotel
+    - [via Giacomo Quarenghi in Milan](location) is where I am staying
+    - [via Roma in Monteleone d'Orvieto](location) is the street where I live
+    - [Trento](location) is the city where I am
+    - I am spending my holidays in [Rovereto](location)
+    - i am going to the [church of Santa Chiara in Reggio di Caserta](location)
+    - my train has just arrived to the [train station of Bologna](location)
+    - I am the [bus stop of Via Rosmini in Trento](location)

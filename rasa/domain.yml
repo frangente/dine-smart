@@ -1,0 +1,412 @@
+# Copyright 2024 Francesco Gentile.
+# SPDX-License-Identifier: Apache-2.0
+
+version: "3.1"
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+# INTENTS
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+intents:
+- greet
+- goodbye
+- affirm
+- deny
+- stop
+- bot_challenge
+- inform_location
+- inform_my_location
+
+- show_search_history
+- clear_search_history
+- select_searches
+- delete_searches
+- ask_search_parameters
+
+- search_place_to_eat_now
+- search_place_to_drink_now
+- search_place_now
+- search_place_to_eat
+- search_place_to_drink
+- search_place
+- inform_search
+- inform_price_range_any
+- inform_price_range_expensive
+- inform_price_range_moderate
+- inform_price_range_inexpensive
+- inform_quality_any
+- inform_quality_excellent
+- inform_quality_moderate
+- inform_price_range_any+inform_quality_any
+- inform_price_range_any+inform_quality_excellent
+- inform_price_range_any+inform_quality_moderate
+- inform_price_range_expensive+inform_quality_excellent
+- inform_price_range_moderate+inform_quality_any
+- inform_price_range_moderate+inform_quality_excellent
+- inform_price_range_moderate+inform_quality_moderate
+- inform_price_range_inexpensive+inform_quality_any
+- inform_price_range_inexpensive+inform_quality_excellent
+- inform_price_range_inexpensive+inform_quality_moderate
+- rank_results_by_relevance
+- rank_results_by_distance
+- rank_results_by_unsupported
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+# ENTITIES
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+entities:
+- user_name
+- location
+- mention
+- place_type
+- cuisine_type
+- meal_type
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+# SLOTS
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+slots:
+  num_internal_errors:
+    type: float
+    initial_value: 0
+    min_value: 0
+    max_value: 3
+    influence_conversation: false
+    mappings:
+    - type: custom
+  
+  known_user:
+    type: bool
+    influence_conversation: false
+    initial_value: false
+    mappings:
+    - type: custom
+  
+  user_name:
+    type: text
+    influence_conversation: false
+    initial_value: "\b"
+    mappings:
+    - type: from_entity
+      entity: user_name
+  
+  user_location:
+    type: any
+    influence_conversation: false
+    mappings:
+    - type: custom
+  
+  # ------------------------------------------------------------------------- #
+  # SEARCH-HISTORY RELATED SLOTS
+  # ------------------------------------------------------------------------- #
+
+  search_history:
+    type: list
+    influence_conversation: true
+    initial_value: []
+    mappings:
+    - type: custom
+  
+  selected_searches:
+    type: list
+    influence_conversation: true
+    mappings:
+    - type: custom
+  
+  selected_searches_buffer:
+    type: list
+    influence_conversation: true
+    mappings:
+    - type: custom
+
+  number_selected_searches:
+    type: categorical
+    values:
+    - none
+    - single
+    - multiple
+    influence_conversation: true
+    mappings:
+    - type: custom
+  
+  # ------------------------------------------------------------------------- #
+  # SEARCH SLOTS
+  # ------------------------------------------------------------------------- #
+  
+  location:
+    type: any
+    influence_conversation: false
+    mappings:
+    - type: custom
+
+  invalid_location:
+    type: text
+    influence_conversation: false
+    mappings:
+    - type: custom
+
+  invalid_location_reasons:
+    type: list
+    influence_conversation: false
+    mappings:
+    - type: custom
+
+  place_type:
+    type: text
+    influence_conversation: false
+    mappings:
+    - type: custom
+
+  invalid_place_type:
+    type: bool
+    influence_conversation: false
+    mappings:
+    - type: custom
+
+  selected_results:
+    type: list
+    influence_conversation: false
+    mappings:
+    - type: custom
+
+  # ------------------------------------------------------------------------- #
+  # BOOKING-HISTORY SLOTS
+  # ------------------------------------------------------------------------- #
+
+  booking_history:
+    type: list
+    influence_conversation: true
+    mappings:
+    - type: custom
+  
+  selected_booking:
+    type: float
+    influence_conversation: false
+    mappings:
+    - type: custom
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+# FORMS
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+forms:
+  search_form:
+    required_slots:
+    - location
+    - place_type
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+# ACTIONS
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+actions:
+- action_session_start
+- action_greet
+
+- validate_search_form
+- action_validate_slot_mappings
+- action_ask_place_type
+- action_ask_location
+- action_search
+- action_rank_results
+
+- action_show_search_history
+- action_clear_search_history
+- action_check_number_selected_searches
+- action_set_selected_searches
+- action_select_searches
+- action_confirm_delete_searches
+- action_delete_searches
+- action_start_search
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+# RESPONSES
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+responses:
+
+  # ------------------------------------------------------------------------- #
+  # MISCELLANEOUS
+  # ------------------------------------------------------------------------- #
+
+  utter_first_greet:
+  - text: "Hi {user_name}! This is Dine-Smart, your personal assistant to assist you in all your dining needs. How can I help you today?"
+  - text: "Hello {user_name}! Welcome to Dine-Smart, your personal assistant for all your dining needs. What can I do for you today?"
+
+  utter_greet:
+  - text: "Hi {user_name}! How can I help you today?"
+  - text: "Hi {user_name}! Happy to see you again. How can I help you today?"
+  - text: "Hello {user_name}! What can I do for you today?"
+
+  utter_goodbye:
+  - text: "Goodbye {user_name}! Have a great day."
+  - text: "Goodbye {user_name}! Have a nice day. Hope to see you soon."
+  - text: "Bye {user_name}! I hope I was able to help you. Have a great day."
+
+  utter_introduction:
+  - text: "I am Dine-Smart, your personal digital assistant to assist you in all your dining needs."
+
+  utter_internal_error:
+  - text: "I'm sorry, I'm having trouble processing your request. Try something else or try again later."
+  - text: "Sorry, I'm having some unexpected issues. Try something else or try again later."
+  - text: "I am having some issues due to which I am unable to process your request. Try something else or try again later."
+  - text: "Sorry but I am facing some issues. Try something else or try again later."
+
+  utter_internal_error_max:
+  - text: "I'm sorry but it seems that something is broken. I am resetting the conversation and reporting the issue. Sorry for the inconvenience."
+  - text: "I'm still having trouble processing your request. Let's see whether starting from a clean slate helps. Sorry for the inconvenience."
+  - text: "Unfortunately, I am still facing issues. I am resetting the conversation and reporting the issue. Sorry for the inconvenience."
+
+  # ------------------------------------------------------------------------- #
+  # SEARCH HISTORY
+  # ------------------------------------------------------------------------- #
+
+  utter_empty_search_history:
+  - text: "You haven't done any searches yet."
+  - text: "You haven't searched for anything yet."
+  - text: "You don't have any searches yet."
+  - text: "Your search history is empty."
+
+  utter_cleared_search_history:
+  - text: "Your search history has been successfully cleared."
+  - text: "All your searches have been deleted."
+  - text: "Okay, I have removed all your searches."
+  - text: "Your search activity is now empty."
+
+  utter_empty_search_history_no_delete:
+  - text: "I am sorry, but you don't have any searches to delete."
+  - text: "Your search history is empty so there is nothing to delete."
+  - text: "I couldn't find any searches to delete."
+
+  # ------------------------------------------------------------------------- #
+  # SEARCH
+  # ------------------------------------------------------------------------- #
+
+  utter_ask_start_search:
+  - text: "Would you like to start a new search?"
+  - text: "Do you want to start a new search now?"
+  - text: "Shall we start a new search?"
+
+  utter_no_active_search:
+  - text: "Sorry there is no active search. Please select one or start a new search before proceeding."
+  - text: "I can't proceed without knowing which search you are referring to. Please select one from your activity."
+
+  utter_multiple_active_searches:
+  - text: "Sorry, but you have multiple selected searches so I can't proceed. Please select one to continue."
+  - text: "I don't know which search you are referring to. Please select one from your activity."
+
+  utter_started_search:
+  - text: "Starting a new search."
+  - text: "Let's start a new search."
+  - text: "Okay, let's start a new search."
+  - text: "Let's find a new place to go."
+
+  # place_type
+  utter_ask_place_type:
+  - text: "What type of place are you looking for? A restaurant, bar, pub, or something else?"
+  - text: "Where would you like to go? A restaurant, bar, pub, or something else?"
+  - text: "Would you like to go to a restaurant, bar, pub, or something else?"
+
+  utter_invalid_place_type:
+  - text: "Sorry, but I can only search for places that serve food or drinks, like restaurants, bars or pubs."
+
+  # location
+  utter_ask_user_location:
+  - text: "Where are you right now?"
+  - text: "Could you tell me your current location so that I can find nearby {place_type}?"
+  - text: "Okay, could you tell me where you are so that I can find nearby {place_type}?"
+
+  utter_ask_user_location_2:
+  - text: "Sorry, but I need to know your location to proceed."
+  - text: "Sorry to insist, but I need to know your location to proceed."
+  - text: "I can't proceed without knowing your location. Could you tell me where you are?"
+
+  utter_need_user_location:
+  - text: "Sorry, but I don't know your location. Could you tell me where you are?"
+  - text: "I need to know your location to find places nearby. Could you tell me where you are?"
+  - text: "I can't find places nearby without knowing your location. Could you tell me where you are?"
+
+  utter_ask_location:
+  - text: "Where would you like to search for {place_type}?"
+  - text: "Where should I look for {place_type}?"
+  - text: "Where do you want me to search for {place_type}?" 
+
+  utter_ask_location_2:
+  - text: "Sorry to insist, but I need to know the search location to proceed."
+  - text: "I can't proceed without knowing the search location. Could you tell me where you want to search?"
+  - text: "I don't want to be annoying, but I need to know the search location to proceed."
+
+  utter_ask_location_place_name:
+  - text: "Where is the {place_name} located?"
+  - text: "Where should I look for the {place_name}?"
+  - text: "Could you tell me where the {place_name} is located?"
+
+  utter_ask_location_place_name_2:
+  - text: "Sorry to insist, but I need to know the location of the {place_name} to proceed."
+  - text: "I can't proceed without knowing the location of the {place_name}. Could you tell me where it is located?"
+  - text: "I don't want to be annoying, but I need to know the location of the {place_name} to proceed."
+
+  utter_location_not_found:
+  - text: "Sorry, but I couldn't find any results for {location}. Could you try again?"
+  - text: "Sorry, but I didn't find any matches for {location}. Could you try again?"
+
+  utter_ambiguous_location:
+  - text: "Sorry, but I found multiple results for {location}. Could you be more specific?"
+  - text: "Sorry, but I wasn't able to precisely locate {location}. Could you provide more details?"
+
+  utter_ask_stop_search:
+  - text: "If you don't want to keep searching, just say 'stop'."
+  - text: "If you want to stop searching, just say 'stop'."
+  - text: "If you no longer intend to search, just say 'stop'."
+
+  # rank
+  utter_changed_rank_by:
+  - text: "Perfect, from now on I will order the results by {rank_by}."
+  - text: "Great, I will order the results by {rank_by} from now on."
+  - text: "Got it, until you change it, I will order the results by {rank_by}."
+
+  utter_already_ranked_by:
+  - text: "The results were already ordered by {rank_by}."
+  - text: "The results are already ordered by {rank_by}."
+  - text: "The results are already sorted by {rank_by}."
+
+  utter_unsupported_rank_by:
+  - text: "Sorry, I can only order the results by relevance or distance. Please choose one of these options."
+  - text: "I am sorry but I can only order the results based on relevance or distance."
+
+  # ------------------------------------------------------------------------- #
+  # TO BE ORGANIZED
+  # ------------------------------------------------------------------------- #
+
+
+  utter_ask_how_can_help_2:
+  - text: "What can I do for you now?"
+  - text: "Can I help you in any other way?"
+  - text: "What else can I do for you?"
+  - text: "Is there anything else I can help you with?"
+
+
+  utter_cannot_select_empty:
+  - text: "You don't have any searches to select."
+  - text: "You don't have any searches to choose from."
+  - text: "You don't have any searches to select."
+
+
+  utter_deleted_searches:
+  - text: "Poof! Your searches have been deleted."
+  - text: "As you command, your searches have been deleted."
+  - text: "It's done! Your searches have been deleted."
+  - text: "Okay, I have removed the selected searches."
+
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+# SESSION CONFIGURATION
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true

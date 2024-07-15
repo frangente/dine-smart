@@ -1,0 +1,46 @@
+# The config recipe.
+# https://rasa.com/docs/rasa/model-configuration/
+recipe: default.v1
+
+# The assistant project unique identifier
+# This default value must be replaced with a unique assistant name within your deployment
+assistant_id: "dine-smart"
+
+# Configuration for Rasa NLU.
+# https://rasa.com/docs/rasa/nlu/components/
+language: en
+
+pipeline:
+# - name: components.SpellChecker
+#   api_key_env_var: BING_SEARCH_V7_SUBSCRIPTION_KEY
+#   default_locale: en-US
+- name: WhitespaceTokenizer
+  intent_tokenization_flag: True
+  intent_split_symbol: "+"
+- name: LanguageModelFeaturizer
+  model_name: "roberta"
+  model_weights: "roberta-base"
+- name: DIETClassifier
+  epochs: 100
+  constrain_similarities: true
+- name: EntitySynonymMapper
+# - name: components.SemanticChecker
+#   default_locale: en
+#   model_name: "all-MiniLM-L6-v2"
+#   min_cosine_similarity: 0.5
+#   entities:
+#   - type: place_type
+#     template: a place where people can eat or drink
+- name: FallbackClassifier
+  threshold: 0.3
+  ambiguity_threshold: 0.1
+
+# Configuration for Rasa Core.
+# https://rasa.com/docs/rasa/core/policies/
+policies:
+- name: AugmentedMemoizationPolicy
+- name: RulePolicy
+- name: TEDPolicy
+  max_history: 10
+  epochs: 100
+  constrain_similarities: true

@@ -1,0 +1,529 @@
+version: "3.1"
+
+# Intents related to the user searching for a place to eat/drink.
+
+nlu:
+
+# --------------------------------------------------------------------------- #
+# SEARCH INTENTS
+# --------------------------------------------------------------------------- #
+
+- intent: search_place_to_eat_now
+  examples: |
+    - search for a place to eat now
+    - i am hungry, where could I eat now?
+    - i haven't eaten yet, i have a desperate need for food
+    - i want to eat something, where can i go?
+    - i want to eat something
+    - i am here with my friends and we are very hungry
+    - i have just finished an exam and i am starving
+    - my coworker and I would like to eat something together before we go back to work
+    - i am looking for a place to eat something now
+    - could you suggest a place to eat something now?
+    - i don't know where to eat, could you help me?
+    - i am craving some food
+    - if i don't eat now, i will faint
+    - i am so hungry, i need to eat something now
+    - i have been walking all day, could you suggest me a place to eat?
+    - i am craving something sweet, could you suggest me a [bakery](place_type) to go?
+    - i need to eat something
+    - need food
+    - food is the only thing on my mind right now
+    - some food is the only thing that can make me feel better
+    - this morning has been very stressful, i need to eat something
+    - my stomach is growling, could you find me a [restaurant](place_type) to eat?
+    - i haven't eaten all day, could you suggest me a [restaurant](place_type) to go?
+    - id love some [ice cream](cuisine_type) right now
+    - i have a meeting in 5 minutes but i am starving
+    - i have 5 minutes to eat something, any places where i can buy a [sandwich](cuisine_type)?
+
+- intent: search_place_to_drink_now
+  examples: |
+    - i am thirsty, where could I drink something now?
+    - some [cocktails](cuisine_type) would be great right now
+    - i want to drink something
+    - any [bar](place_type) around here where i can have a drink?
+    - i am here with my friends and we want to have a drink
+    - i have just finished an exam and i want to celebrate
+    - my coworkers and I have just finished an important project, we want to celebrate
+    - i am looking for a place to drink something now
+    - these last days have been very stressful, i need to drink something
+    - i am so stressed, i need to let off some steam, where can i go?
+    - after all these years of jard work, i have ben finally promoted, i need to celebrate
+    - i have just been dumped, i need to drink something
+    - any [tavern](place_type) around here where i can have a drink?
+    - i have eaten too much and i need to drink something to digest
+    - i just discussed my thesis, i need to celebrate, any places where my friend and I can drink something?
+
+- intent: search_place_now
+  examples: |
+    - search to go now
+    - start search for a place to go now
+    - i am looking for a place to go now
+    - at home i was in a hurry so i couldn't have my [breakfast](meal_type), what do you suggest?
+    - any places that sell [donuts](cuisine_type) around here?
+    - i am in the mood for some [pizza](cuisine_type), could you suggest me a [restaurant](place_type)?
+    - any [bars](place_type) around here where i can go now?
+    - i am in the mood for some [beer](cuisine_type), could you suggest me a [pub](place_type)?
+    - i am in the mood for some [wine](cuisine_type), could you suggest me a [wine bar](place_type)?
+    - i feel like having a [cocktail](cuisine_type), could you suggest me a [bar](place_type)?
+    - i am here with my family and we are looking for a [bistro](place_type) where to go now
+    - i am really craving some [sushi](cuisine_type), could you suggest me a place to go?
+    - my friends and I want to have an [aperitif](meal_type), where can we go?
+    - i don't wanna go home yet, any place where i can have an [aperitif](meal_type)?
+    - i am feeling so sleepy, i need to drink a [coffee](cuisine_type) to wake up
+    - i just had the most boring meeting ever, i need to drink a [coffee](cuisine_type) or i will fall asleep
+    - right now the only thing that can keep me awake is a [coffee](cuisine_type)
+    - i am so tired, find me a [coffee shop](place_type) to drink an [espresso](cuisine_type)
+
+- intent: search_place_to_eat
+  examples: |
+    - search for a place to eat
+    - tomorrow i have a very short break, so i need to find a place where i can eat quickly
+    - i am new to city, what are the best places where to eat [local food](cuisine_type)?
+    - find me a place where i can go eat [pasta](cuisine_type) and [pizza](cuisine_type)
+    - i am tired to eat alone at home, propose me some places where i can go eating surrounded by people
+    - next week I am going to [Bologna](location), some friends that have been there told me that food is fantastics, could you suggest me some places so that I can try it?
+    - next week I will discuss my thesis so I want to organize a [lunch](meal_type) with my friends, could you suggest me some places where to go?
+
+- intent: search_place_to_drink
+  examples: |
+    - search for a place to drink
+    - i am new to the city, where are the best places where to drink something?
+    - in the next days i will have some friends coming to visit me, where can we go to drink something?
+    - tomorrow i will be promoted, where can i go to celebrate?
+    - next week I will go to [Amsterdam](location), some friends that have been there have told me that there are some great places where to drink something, could you suggest me some?
+    - tomorrow is my birthday, my friends and I would like to go out for a drink, could you suggest me some places?
+    - tomorrow i have a date, could you suggest me some places where to go for a drink?
+    - tomorrow I will finally meet again my best friend, i was thinking to go to a [wine bar](place_type), could you suggest me some?
+    - tomorrow i will finally discuss my thesis, i need to celebrate, could you suggest me some places where to go for a drink?
+
+- intent: search_place
+  examples: |
+    - search
+    - i said search
+    - i want to search
+    - are you listening to me? i want to search
+    - come on you can do it, search
+    - ok, let's search
+    - start search
+    - start a new search
+    - start searching
+    - search for a place
+    - i am looking for a [restaurant](place_type) in [Ravenna](location)
+    - i am looking for a [eatery](place_type), possibly near the [Colosseum](location)
+    - tomorrow is my first day at work, i need to find a place where to have [lunch](meal_type) with my coworkers
+    - this thursday my family is coming to visit me, i need to find a place where to have [dinner](meal_type)
+    - tomorrow morning i start school an hour later, i would like to have [breakfast](meal_type) in a [cafe](place_type)
+    - i am new to the city, any [pubs](place_type) around here where I can meet new people?
+    - i am looking for a [restaurant](place_type) where to have [dinner](meal_type)
+    - tomorrow i am going out with my friends, could you suggest me a [restaurant](place_type)?
+    - this evening I have a date, could you lookup some [restaurants](place_type) for me?
+    - tomorrow is my first day at work, i need to find a place to have [lunch](meal_type) with my coworkers
+    - this thursday my family is coming to visit me, i need to find a place to have [dinner](meal_type)
+    - my boss has invited me to have [lunch](meal_type) with him, could you suggest me a [restaurant](place_type)?
+    - i am planning a trip to [Rome](location), could you suggest me some [restaurants](place_type) to try?
+    - tomorrow is my birthday, my friends and I would like to go out for [dinner](meal_type), could you suggest me some [restaurants](place_type)?
+    - tomorrow i go to school an hour later, i would like to have [breakfast](meal_type) in a [cafe](place_type)
+    - next week i am going to [Trento](location), could you suggest me some [restaurants](place_type) to try?
+    - i always go to the same [restaurant](place_type), could you suggest me some new places to try?
+    - i am curious to try some new [bakeries](place_type) in my area, could you suggest me some?
+    - i need to organize my trip to [Genoa](location), could you lookup some [restaurants](place_type) for me?
+    - any [restaurants](place_type) where i can have [dinner](meal_type)?
+    - could you lookup a [restaurant](place_type) called [Il Caminetto](place_name) for me?
+    - do you know [Pizzeria da Gustavo](place_name)?
+    - i have heard about a [restaurant](place_type) called [Il Gambero](place_name), could you lookup it for me?
+    - my friend has recommended me [la Piccola Trattoria](place_name), could you search it for me?
+    - i read somewhere that [Il Gabbiano](place_name) is the best [restaurant](place_type) in town, could you lookup it for me?
+    - are there any [McDonald's](place_name) around here?
+    - i am looking for a [bar](place_type) called [Urban Lab](place_name). do you know it?
+    - do you know [Pasticceria il Duomo](place_name)?
+    - any [bakery](place_type) around here where i can buy some [bread](cuisine_type)?
+    - my favorite [restaurant](place_type) is closed today, could you suggest me some alternatives?
+    - some friends of mine are coming to visit me, could you suggest me some [restaurants](place_type) to take them to?
+    - next week i am going to [Milan](location) and i have heard that there are some great [pizzerias](place_type) there, could you suggest me some?
+    - tomorrow i wanna have [lunch](meal_type) with my coworkers, any places that serve [sushi](cuisine_type)?
+    - now i wanna search a [French](cuisine_type) [bistro](place_type)
+    - let's now search for a [pizzeria](place_type) with also [vegan](cuisine_type) options
+
+# --------------------------------------------------------------------------- #
+# INFORMATION INTENTS
+# --------------------------------------------------------------------------- #
+
+- intent: inform_search
+  examples: |
+    - it should be a [restaurant](place_type) that serves [italian](cuisine_type) food
+    - it should be a simple [bar](place_type)
+    - it should be in [Rome, Italy](location)
+    - it should be near [me](location) and it should serve [pizza](cuisine_type)
+    - id really like to go to a [sushi](cuisine_type) [restaurant](place_type)
+    - you know what? i haven't eaten some good [seafood](cuisine_type) in a while, can you find a place?
+    - id really like to go to a [barbecue](cuisine_type) [restaurant](place_type)
+    - filter out places that do not serve [vegan](cuisine_type) food
+    - it should be close to the [Colosseum](location)
+    - it would be better if it served [vegetarian](cuisine_type) food
+    - it should be a [restaurant](place_type) near [Pizza Duomo in Ravenna](location)
+    - if it were close to [Piazza del Popolo](location) it would be perfect
+    - the closer to the [Vatican Museums](location) the better
+    - before going to the [restarant](place_type) we will go to the [Uffizi Gallery](location), so it should be close
+    - i am so tired, can you search something closer to [my location](location)?
+    - i am running to the [station](location), can you find it close to it?
+    - no it should be in [Venice, Italy](location)
+    - a [Mexican](cuisine_type) [restaurant](place_type) would be perfect
+    - i just need a [bar](place_type) that serves some [sandwiches](cuisine_type)
+    - a [coffee shop](place_type) would be better
+    - any [restaurant](place_type) that serves [pasta](cuisine_type) would be fine
+    - i'd prefer a [pizzeria](place_type)
+    - you know what? i haven't eaten some good [seafood](cuisine_type) in a while, can you find a place?
+    - very close to the [train station of Milan](location) would be perfect
+    - a [bar](place_type) is more than enough, i just need a [coffee](cuisine_type)
+    - perfect, but now i am in [Florence, Italy](location)
+    - repeat the previous search but now I want it to be an [eatery](place_type)
+    - it must have [celiac](cuisine_type) options
+    - a [restaurant](place_type) please
+    - make it a [pub](place_type)
+    - if you can id prefer a [bistro](place_type)
+    - i wanna go to a [tavern](place_type) in [Turin](location)
+
+# PRICE RANGE INTENTS
+
+- intent: inform_price_range_any
+  examples: |
+    - do not filter by price
+    - i don't care about the price
+    - i don't have a preference for the price
+    - any price is fine with me
+    - i don't have a budget constraint
+    - keep all places regardless of the price
+    - price is not a problem for me
+    - price is not an issue for me
+    - price is not a relevant factor for me
+    - i don't think price is synonymous with quality, so i don't care about it
+    - i don't think that expensive places are better, so i don't care about the price
+    - i don't think that cheap places are worse, so i don't care about the price
+    - remove any price filter
+    - the restaurant can be expensive
+    - the place can be pricey
+    - i don't mind spending a lot
+    - i don't mind spending a bit more
+    - i don't care if i spend a lot
+    - i am willing to spend a lot of money on this dinner
+    - it's my daughter's birthday, so i don't mind spending a lot
+    - it's not a problem if it's expensive
+    - it is for an important occasion, so i don't mind spending a lot
+    - luckily, i have a lot of money to spend
+    - my financial situation allows me to spend a lot
+    - i don't have budget constraints when it comes to food
+    - luckily my credit card has no limits, so i can spend a lot
+    - i am not a cheapskate, i can spend a bit more
+    - i am not stingy, i can spend a bit more
+    - if it is for my family i spend whatever it takes to make them happy
+    - i want to impress my girlfriend, so i can spend a bit more
+    - i have a certain standard, so i don't mind spending a lot
+    - this is my last day in this city, i don't care about the price
+
+- intent: inform_price_range_expensive
+  examples: |
+    - select only the most expensive restaurants
+    - i want to go to the most expensive restaurant in town
+    - filter out all places that are not expensive
+    - keep only the expensive places
+    - i am in the mood for something expensive
+    - i want to go to a place where i can show off
+    - luxury is my middle name
+    - my reputation is important, so i have to go to an expensive place
+    - i want to go to a high-end place
+    - people cannot say that i am cheap
+    - i cannot afford to be seen as cheap
+    - i want to go somewhere fancy
+    - it must be elegant
+    - a luxurious place is a must
+    - i don't want to go to a place that is not high-end
+
+- intent: inform_price_range_moderate
+  examples: |
+    - filter out cheap places but not too expensive
+    - i don't want to go to a cheap place, but not too expensive
+    - i can spend a bit more, but not too much
+    - keep only places with a moderate price
+    - it should not be too expensive
+    - i don't want to spend too much
+    - keep in mind that i don't want to spend too much
+    - if it's not noo expensive, it's fine
+    - i don't want to spend a lot
+    - i am not on a budget, still i don't want to spend too much
+    - filter out cheap and expensive places
+    - i am not broke but I also don't want to spend too much
+    - i am neither stingy nor a spendthrift, so i can afform a moderate price
+    - i am not a cheapskate, but i also don't want to spend too much
+    - filter by moderate price
+    - moderate price only
+    - i don't want to go to a cheap place
+
+- intent: inform_price_range_inexpensive
+  examples: |
+    - i am on a budget
+    - i am on a tight budget, so it should be cheap
+    - i cannot afford to spend a lot
+    - i spent all my money on my next holiday, so i don't have much left to spend on food
+    - i have just paid my rent, so i don't have much left to spend on food
+    - i have just been fired, so make sure it's cheap
+    - cheap places only
+    - cheap please
+    - we are broke, so we cannot afford anything expensive
+    - i am a student, so money is tight
+    - my wallet is lighter than a feather, so make sure that it does not cost much
+    - filter out expensive places
+    - keep only cheap places
+    - keep only places that do not cost a fortune
+    - i am not a spendthrift, so it should be cheap
+    - the cheaper the better
+    - i am not one who spend a lot of money on food
+    - i am not the kind of person who spends a lot of money on restaurants
+
+# QUALITY INTENTS
+
+- intent: inform_quality_any
+  examples: |
+    - i don't care about the quality
+    - i do not trust reviews, so quality is not a relevant factor for me
+    - i don't have a preference for the quality
+    - any quality is fine with me
+    - keep all places regardless of the quality
+    - remove any filter by quality
+    - remove any filter by rating
+    - i don't care about what people say about the place
+    - do not filter out places based on the quality
+    - do not consider the reviews when searching for a place
+    - some people are too picky, i am not one of them
+    - it's just a quick meal, so don't bother about the quality
+    - i am not a food critic, so quality is not a relevant factor for me
+    - last time i trusted the reviews, i was disappointed, so i will not do it again
+    - i don't care about the quality, i just want to eat something
+    - it's not a special occasion so quality is not a relevant factor in this case
+
+- intent: inform_quality_excellent
+  examples: |
+    - i only want to go to the best places
+    - this is probably the most important dinner of my life, so it has to be the best
+    - i cannot afford to go to a place that is high-endnot excellent
+    - i cannot mess up this dinner, so it has to be the best
+    - i want to go to a [restaurant](place_type) that is excellent
+    - i want to go to a [restaurant](place_type) that is top-notch
+    - it must be an high-quality [restaurant](place_type)
+    - do not consider places that are not excellent
+    - list only places with high ratings
+    - this is my first time in this city, i want to go to the best places
+    - keep only places that have excellent reviews
+    - i trust people's reviews, so only the best places
+    - i want to go to a place that is worth it
+    - if it's not the best, i don't want to go
+    - make sure that the place is top quality
+    - make sure that the places is top rated
+    - i want to go to a place that is highly recommended
+    - i dont wanna be disappointed, so only the best places
+    - i want to go to a place that is worth the money
+    - apply a filter to keep only the best places by quality
+    - let me tell you that I am a very demanding person, so only the best places
+    - i am a very demanding person, so only the best places
+    - quality is extremely important to me, so please make sure that the place is excellent
+    - i haven't been to a restaurant in a while, so i want to go to the best place
+    - i haven't seen my friend in a while, so i want this dinner to be special
+    - high quality is not a must but it would be nice
+
+- intent: inform_quality_moderate
+  examples: |
+    - bad places and I are like oil and water, we don't mix
+    - do not even try to suggest me a bad place
+    - i don't want to go to a bad place
+    - if it has bad reviews, i don't want to go
+    - remove poor quality places
+    - i have been once to a bad place, i don't want to repeat the experience
+    - i don't want to be seen in a bad place, so do not consider them
+    - do not consider places with low ratings
+    - keep only places that have decent reviews
+    - i want to go to a place that is not bad
+    - i don't pretend to go to the best places, but at least not the worst
+    - remove the worst places
+    - i don't wanna risk and go to a bad place, so prune them
+    - i don't have high expectations, but at least not the worst
+    - i don't completely trust the reviews, but there is always a grain of truth
+    - consider only places that have good reviews
+    - i don't want to go to a place that is not worth it
+    - apply a filter to keep only the places with decent quality
+    - it is for a dinner with my friends, so it doesn't have to be the best
+    - i am not a food critic, so it doesn't have to be the best
+    - i am the kind of person who is happy with little, so it doesn't have to be the best
+    - i settle for little as long as it doesn't suck
+    - do not even think about suggesting me a bad place
+    - if you had to choose between a good place and a bad place, which one would you choose? well, i want the good one
+    - do I sound like the kind of person who goes to bad places?
+    - i don't need to go to the best places, but at least not the worst
+    - it's not a special occasion, so it doesn't have to be the best, but at least not the worst
+
+# PRICE RANGE AND QUALITY INTENTS
+
+# price range: any
+- intent: inform_price_range_any+inform_quality_any
+  examples: |
+    - i don't care about the price or the quality
+    - do not filter based on the price or the ratings
+    - i dont have money problems and i am not a food critic, so i don't care about the price or the quality
+    - any price range and any quality is fine with me
+    - i just wanna eat something regardless of the price or the quality
+    - we just wanna spend some time together, any place is fine
+    - list everything without taking into consideration the price or the reviews
+    - price is not a problem and i don't trust reviews, so search for any place
+    - last time i trusted the reviews, i was disappointed, so i will not do it again, and i don't care about the price
+
+- intent: inform_price_range_any+inform_quality_excellent
+  examples: |
+    - this is a special occasion, i don't mind spending a lot, but the place has to be excellent
+    - i can spend a lot of money, but only if the place is excellent
+    - i don't mind spending a lot, but only if the place is top-notch
+    - serach only places with high ratings, even if they are expensive
+    - if i have to spend a lot is fine as long as the quality of the place is excellent
+    - i am not the one who will pay the bill, so take me to the best place
+    - as long as the place has high ratings i am happy with the price
+    - i wanna eat excellent food, i don't care about the price
+
+- intent: inform_price_range_any+inform_quality_moderate
+  examples: |
+    - i don't mind spending a lot as long as the place is not bad
+    - i can spend a lot of money, but only if the place is not bad
+    - as long as the place has good ratings i am happy with the price
+    - it's important that the place is not bad, even if it's expensive
+    - keep only places with good ratings even if they are expensive
+    - do not filter based on price range, but make sure that the place is not bad
+    - any price range is fine with me, as long as the place is not bad
+    - price do not care, but good quality is a must
+
+# price range: expensive
+- intent: inform_price_range_expensive+inform_quality_excellent
+  examples: |
+    - consider only the most expensive places, but they have to be excellent
+    - quality and price go hand in hand, so only the best places
+    - filter out anything that is not expensive and excellent
+    - i wanna show off, so only the best and most pricey places
+    - i want to go to a high-end place, but it has to be excellent
+    - i have to impress my boss, find me the most luxurious [restaurants](place_type)
+
+# price range: moderate
+- intent: inform_price_range_moderate+inform_quality_any
+  examples: |
+    - i don't care about the reviews, but it should not be too expensive
+    - do not consider people ratings, just make sure that the place is not too expensive
+    - do not filter based on the quality, but make sure that the place is not too expensive
+    - i cannot afford to spend too much, so quality is not a relevant factor for me
+    - my friends and I do not care about the quality, but we don't want to spend too much
+    - price not too high, quality irrelevant
+    - add the following constraints, the place should not be too expensive, ratings any
+    - google maps ratings are not always reliable, so just make sure that the place is not too expensive
+
+- intent: inform_price_range_moderate+inform_quality_excellent
+  examples: |
+    - i don't want to spend too much, but the place has to be excellent
+    - i want to go to a top-noth [restaurant](place_type), but can you make sure that it is not too expensive?
+    - it my first date with my crush, so it has to be excellent, but i cannot afford to spend too much
+    - i don't want to spend too much, but i want to go to a place that is worth it
+    - the [pizza](cuisine_type) should be excellent, but it's still a [pizza](cuisine_type), so it should not be too expensive
+    - i don't want to spend too much, but i want to go to a place that is highly recommended
+    - keep only places with high ratings, but not too expensive
+    - consider only [bars](place_type) with a moderate price but high ratings
+    - i wanna eat excellent food, but i don't want to spend too much
+
+- intent: inform_price_range_moderate+inform_quality_moderate
+  examples: |
+    - i dont wanna spend too much but the [restaurant](place_type) should still be good
+    - filter out expensive places, but make sure that the place is not bad
+    - keep only places with good prices and good ratings
+    - keep only [bars](place_type) with a good quality-price ratio
+    - my friends and I do not wanna spend much, but we sould still like to spend a nice evening
+    - my parents are gonna visit me, i don't want them to spend a lot, but i also want to take them to a good place
+    - anything that is not bad but also does not cost a fortune?
+
+# price range: inexpensive
+- intent: inform_price_range_inexpensive+inform_quality_any
+  examples: |
+    - i only need an affordable place, quality is not a relevant factor for me
+    - i am on a tight budget, i cannot take into consideration the quality
+    - i don't think i can have too many expectations on the quality with my low budget
+    - do not consider the quality, just make sure that the place is cheap
+    - do not filter by quality, just make sure that the place is cheap
+    - price low, quality irrelevant
+    - just need a cheap place, quality is not a must
+
+- intent: inform_price_range_inexpensive+inform_quality_excellent
+  examples: |
+    - i am on a budget, but i still want to go to a place that is excellent
+    - it is for my birthday so it has to be excellent, but i have to pay for all my friends, so it has to be cheap
+    - id love to go to a top-notch [restaurant](place_type), but i am broke, is it possible?
+    - any places that are excellent but do not cost a fortune?
+    - filter out places that do not have 5 stars, but also that do not cost a fortune
+    - i am a student so i cannot afford pricey places, but i also love high quality food, where can i go?
+
+- intent: inform_price_range_inexpensive+inform_quality_moderate
+  examples: |
+    - i am on a budget, but can you make sure that the place is not bad?
+    - currently i am broke, but i would still like to eat something decent
+    - filter out places with less than 3 stars and keep only those that are cheap
+    - i'd love to go to a good [restaurant](place_type) with my friends, but we are all broke
+    - keep only places with at least 3 stars and that cost few bucks
+    - i don't have much money but i don't wanna feel sick after eating
+    - i just need a [pub](place_type) where a [beer](cuisine_type) costs less than 5 bucks and the food is decent
+
+# --------------------------------------------------------------------------- #
+# ORDERING INTENTS
+# --------------------------------------------------------------------------- #
+
+- intent: rank_results_by_relevance
+  examples: |
+    - order by relevance
+    - relevance order
+    - sort the results by relevance
+    - put the results in relevance order
+    - put the most relevant results first
+    - i want to see the most relevant results first
+    - show me the most relevant results first
+    - do not order the results by distance, order them by relevance
+    - do not order by distance
+    - i want to see the most relevant options first
+    - sort the options by relevance
+    - could you show me first the most relevant options?
+
+- intent: rank_results_by_distance
+  examples: |
+    - order by distance
+    - distance order
+    - sort the results by distance
+    - put the results in distance order
+    - put the closest results first
+    - i want to see the closest results first
+    - show me the results that are the closest to me
+    - do not order the results by relevance, order them by distance
+    - do not order by relevance
+    - i want to see the closest options first
+    - i want to see the options that are the closest to me first
+    - i am in a hurry, show me the closest options first
+    - i don't want to walk too much, show me the closest options first
+    - i don't want to drive too much, show me the closest options first
+    - i am lazy, show me the closest options first
+
+- intent: rank_results_by_unsupported
+  examples: |
+    - order the results based on their price
+    - sort the results by their quality
+    - put the results in price order
+    - put the best quality results first
+    - put the cheapest results first
+    - sort the results based on the reviews
+    - put the results with the best reviews first
+    - i want to see the cheapest options first
+    - i want to see the best quality options first
+    - order the results according to their reviews
+    - put the worst places at the end
+    - sort the results by their popularity
+    - put at the top the places with the most reviews
+    - put the least touristy places first
+    - sort the results by their price range
+

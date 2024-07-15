@@ -1,0 +1,87 @@
+# Copyright 2024 Francesco Gentile.
+# SPDX-License-Identifier: Apache-2.0
+
+version: "3.1"
+
+nlu:
+- intent: show_search_history
+  examples: |
+    - show me the search history
+    - search history
+    - show me my history of searches
+    - show me all searches I have done
+    - show me the history of searches
+    - could you show me the search history?
+    - what is my search history?
+    - what are my previous searches?
+    - what searches have I done?
+    - what searches have I performed?
+    - may I see my search activity?
+    - can you list all the searches that I have done?
+    - all searches I have done
+    - list of searches I have done
+
+- intent: clear_search_history
+  examples: |
+    - clear the search history
+    - delete the search history
+    - remove the search history
+    - delete my search activity
+    - delete all searches
+    - remove all searches
+    - clear all searches
+    - clear all search history
+
+- intent: select_searches
+  examples: |
+    - select [them](mention)
+    - select [all of them](mention)
+    - select search number [1](mention)
+    - select search [two](mention)
+    - go to search [3](mention)
+    - go to the [fourth](mention) search
+    - select the [first](mention) search
+    - select the [last](mention) search
+    - select the [second](mention) search
+    - show me the [last](mention) search
+    - go to the [next](mention) search
+    - go to the [previous](mention) search
+    - load the [next](mention) search
+    - start the [previous](mention) search
+    - move back to the [first](mention) search
+    - [previous](mention) search
+    - [next](mention) search
+    - [first](mention) search
+
+- intent: delete_searches
+  examples: |
+    - delete search
+    - delete [this](mention) search
+    - remove [current](mention) search
+    - delete the current search
+    - remove the [first](mention) search
+    - delete the [last](mention) search
+    - cancel the [second](mention) search
+    - wipe out the [third](mention) search
+    - delete [those](mention) searches
+    - delete [selected](mention) search
+
+- intent: ask_search_parameters
+  examples: |
+    - what are the parameters of [this](mention) search?
+    - what are the search parameters?
+    - search parameters
+    - search criteria
+    - search filters
+    - search options
+    - search settings
+    - search configuration
+    - search details
+    - search specifics
+    - list the search arguments
+    - show me the search parameters
+    - tell me the search criteria that are being used
+    - tell me the search filters that are being used
+    - any idea about the search options that are being used?
+    - what are the search settings?
+    - what are the parameters of the [second](mention) search?
