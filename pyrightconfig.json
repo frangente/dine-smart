@@ -1,0 +1,15 @@
+{
+    "typeCheckingMode": "strict",
+    "pythonVersion": "3.10",
+    "include": [
+        "rasa/actions",
+        "rasa/components",
+        "rasa/connectors"
+    ],
+    "venvPath": ".",
+    "venv": ".venv",
+    "reportUnknownMemberType": "none",
+    "reportMissingTypeStubs": "none",
+    "reportUnknownVariableType": "none",
+    "reportUnknownArgumentType": "none"
+}

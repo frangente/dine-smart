@@ -1,0 +1,29 @@
+fix = true
+line-length = 88
+target-version = "py310"
+
+[format]
+preview = true
+
+[lint]
+fixable = ["ALL"]
+select = ["ALL"]
+ignore = [
+    "ANN101",
+    "ANN102",
+    "ANN401",
+    "ARG002",
+    "COM812",
+    "D203",
+    "D213",
+    "ERA001",
+    "ISC001",
+    "PGH003",
+    "PLR0913",
+    "PLR2004",
+    "RET504",
+    "SIM117",
+]
+
+[lint.pydocstyle]
+convention = "google"
