@@ -1,0 +1,204 @@
+version: "3.1"
+
+nlu:
+
+- intent: ask_address
+  examples: |
+    - where is [it](mention) located?
+    - what is [its](mention) address?
+    - where can i find [it](mention)?
+    - what is [its](mention) address?
+    - what is [their](mention) address?
+    - where is [it](mention) located?
+    - where is [it](mention)?
+    - could you tell me where [it](mention) is?
+    - where is the [second](mention) one?
+    - where can I find the [first](mention) one?
+    - the address of the [third](mention) one?
+    - what is the address of the [first](mention) and [second](mention) one?
+    - where are the [first two](mention) located?
+    - where is the [first one](mention)?
+    - could you tell me where the [second](mention) is?
+    - could you tell me where i can find the [third one](mention)?
+
+- intent: ask_contact
+  examples: |
+    - what is the phone number of the [first two](mention) restaurants?
+    - what is [their](mention) phone number?
+    - what is the contact number?
+    - what is the phone number?
+    - can I have the phone number?
+    - how can I contact [it](mention)?
+    - how can I contact [them](mention)?
+    - what is [their](mention) contact number?
+    - how can I call the [last](mention) one?
+    - how can I contact the [last two](mention)?
+    - tell me the phone number of the [third](mention) and [fourth](mention) one?
+    - could you repeat the phone number of the [first](mention) one?
+
+- intent: ask_price_level
+  examples: |
+    - how much does [it](mention) cost?
+    - are [they](mention) expensive?
+    - is [it](mention) cheap or expensive?
+    - are the [first two](mention) affordable?
+    - what is the price level?
+    - is [it](mention) expensive?
+    - is [it](mention) cheap or expensive?
+    - how much does [it](mention) cost?
+    - how much are the prices?
+    - what is the price range?
+    - could you tell me whether [it](mention) is expensive?
+    - could you tell me whether [they](mention) are affordable?
+
+- intent: ask_rating
+  examples: |
+    - what is the rating?
+    - what is [its](mention) rating?
+    - how is [it](mention) rated?
+    - how it [its](mention) evaluated by the customers?
+    - is [it](mention) well rated?
+    - are [they](mention) well rated?
+    - do the reviews say [it](mention) is good?
+    - what is the rating of the [first](mention)?
+    - do the reviewers like the [second](mention)?
+    - is [it](mention) a good place to eat?
+    - are [they](mention) recommended?
+    - do people recommend [them](mention)?
+    - could you tell me whether [they](mention) are well rated?
+    - would you recommend the [last](mention) one?
+
+- intent: ask_website
+  examples: |
+    - what is the website?
+    - what is [its](mention) website?
+    - could you tell me the website of the [first one](mention)?
+    - show me the webpage of the [last two](mention)?
+    - what is the url of the [third](mention)?
+    - what is the website of the [first](mention) and [second](mention) one?
+    - do [they](mention) have a website?
+    - do [they](mention) have a page on the internet?
+    - can I find [them](mention) online?
+    - does [it](mention) have a website?
+    - could you tell me the [first one](mention) website?
+    - could you tell me whether the [second](mention) has a website?
+
+- intent: ask_allows_animals
+  examples: |
+    - does [it](mention) allow animals?
+    - can I bring my dog?
+    - is [it](mention) pet friendly?
+    - can I bring my cat?
+    - can I bring my pet?
+    - are the [first two](mention) pet friendly?
+    - can I bring my dog to the [first one](mention)?
+    - what is animal policy in the [second](mention)?
+    - does the [second one](mention) have a pet policy?
+    - can I bring my pet to the [third](mention)?
+    - are there any restrictions on animals in the [fourth](mention)?
+    - is it a problem if I bring my dog to the [fifth](mention)?
+    - is it okay to brink an animal to the [last one](mention)?
+
+- intent: ask_good_for_children
+  examples: |
+    - is [it](mention) good for children?
+    - can I bring my kids?
+    - is [it](mention) child friendly?
+    - can I bring my baby?
+    - can I bring my children?
+    - are children allowed in the [first three](mention)?
+    - can I bring my kids to the [second one](mention)?
+    - are there any restrictions on children in the [third](mention)?
+    - are there any problems with children in the [fourth](mention)?
+    - could you tell me whether the [fifth](mention) is good for children?
+
+- intent: ask_parking_options
+  examples: |
+    - what are the parking options?
+    - is there parking?
+    - where can I park?
+    - is there any parking space?
+    - can i park with my car?
+    - is there a parking lot?
+    - can i park near the [first](mention) one?
+    - where can I park my car near the [second](mention) one?
+
+- intent: ask_payment_options
+  examples: |
+    - what are the payment options?
+    - how can I pay in the [first](mention)?
+    - can I pay in cash?
+    - can I pay with credit card?
+    - can I pay with debit card?
+    - can I pay with my phone?
+    - can I use my debit card in the [first](mention)?
+    - can I pay with my phone in the [second](mention)?
+
+- intent: ask_outdoor_seating
+  examples: |
+    - does [it](mention) have outdoor seating?
+    - is there a terrace?
+    - can I sit outside?
+    - is there a garden?
+    - is there a patio?
+    - can I sit outside in the [first](mention)?
+    - can I eat at outdoor table in the [first two](mention)?
+    - could you tell me whether the [third](mention) has a terrace?
+    - is there a garden in the [fourth](mention)?
+    - can I sit outside in the [fifth](mention)?
+    - could you tell me whether I can eat outside in the [last one](mention)?
+
+- intent: ask_reservable
+  examples: |
+    - is it possible to make a reservation?
+    - can I book a table?
+    - can I reserve a table?
+    - can I make a reservation?
+    - can I book a table in the [first](mention)?
+    - can I reserve a table in the [second](mention)?
+    - could you tell me whether I can make a reservation in the [third](mention)?
+    - is the [fourth](mention) reservable?
+
+- intent: ask_restroom
+  examples: |
+    - are there restrooms?
+    - is there a toilet?
+    - where is the bathroom?
+    - is there a restroom?
+    - can I use the toilet?
+    - is there a bathroom in the [first](mention)?
+    - where is the restroom in the [second](mention)?
+    - is there a toilet in the [third](mention)?
+    - do [they](mention) have a bathroom?
+
+- intent: ask_vegetarian
+  examples: |
+    - does [it](mention) have vegetarian options?
+    - is there a vegetarian menu?
+    - can I eat vegetarian?
+    - is there a vegetarian dish?
+    - do [they](mention) have vegan options?
+    - can I eat vegetarian in the [first one](mention)?
+    - is there a vegetarian dish in the [second](mention)?
+    - does the [third one](mention) have vegan options?
+
+- intent: ask_takeout
+  examples: |
+    - is takeout available?
+    - can I take the food with me?
+    - can I order takeout?
+    - can I take the food to go?
+    - can I take the food away?
+    - can I order takeout in the [first](mention)?
+    - can I take the food to go in the [second](mention)?
+    - can I order takeout in the [third](mention)?
+
+- intent: ask_previous_info
+  examples: |
+    - and what about the [second](mention)?
+    - what about the [first](mention)?
+    - and the [third](mention)?
+    - could you also tell me about the [fourth](mention)?
+    - what about the [first two](mention)?
+    - and the [second](mention)?
+    - is there anything about the [third](mention)?

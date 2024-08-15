@@ -1,0 +1,57 @@
+version: "3.1"
+
+rules:
+
+# --------------------------------------------------------------------------- #
+# ERROR HANDLING
+# --------------------------------------------------------------------------- #
+
+- rule: ask the user to rephrase whenever they send a message with low NLU confidence
+  steps:
+  - intent: nlu_fallback
+  - action: utter_ask_rephrase
+
+- rule: the user asks for something out of scope
+  steps:
+  - intent: out_of_scope
+  - action: action_out_of_scope
+
+# --------------------------------------------------------------------------- #
+# GREETINGS, GOODBYES, AND HELP
+# --------------------------------------------------------------------------- #
+
+- rule: say hello anytime the user greets
+  steps:
+  - intent: greet
+  - action: action_greet
+
+- rule: say goodbye anytime the user says goodbye
+  steps:
+  - intent: goodbye
+  - action: utter_goodbye
+  - action: action_session_start
+
+- rule: states who the bot is when the user asks
+  steps:
+  - intent: bot_challenge
+  - action: utter_introduction
+
+- rule: ask the user how can help when the user asks for help
+  steps:
+  - intent: help
+  - action: utter_ask_help
+
+- rule: ask the user how can help when the user asks for help
+  steps:
+  - action: utter_ask_further_help
+  - intent: affirm
+  - action: utter_ask_help
+
+- rule: say goodbye whenever the user does no longer need help
+  steps:
+  - action: utter_ask_further_help
+  - or:
+    - intent: deny
+    - intent: stop
+  - action: utter_goodbye_no_help
+  - action: action_session_start

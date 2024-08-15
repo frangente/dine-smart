@@ -20,10 +20,15 @@ pipeline:
 - name: LanguageModelFeaturizer
   model_name: "roberta"
   model_weights: "roberta-base"
+- name: CountVectorsFeaturizer
+  analyzer: char_wb
+  min_ngram: 1
+  max_ngram: 4
 - name: DIETClassifier
   epochs: 100
   constrain_similarities: true
-- name: EntitySynonymMapper
+  use_gpu: true
+# - name: EntitySynonymMapper
 # - name: components.SemanticChecker
 #   default_locale: en
 #   model_name: "all-MiniLM-L6-v2"
@@ -40,7 +45,11 @@ pipeline:
 policies:
 - name: AugmentedMemoizationPolicy
 - name: RulePolicy
+  core_fallback_threshold: 0.3
+  core_fallback_action_name: action_default_fallback
+  enable_fallback_prediction: True
 - name: TEDPolicy
   max_history: 10
   epochs: 100
   constrain_similarities: true
+  use_gpu: true

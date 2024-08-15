@@ -11,7 +11,6 @@ from ._grammar import (
     singularize,
     to_second_singular_person,
 )
-from ._maps import get_maps_client
 from ._misc import (
     deserialize,
     deserialize_iterable,
@@ -29,12 +28,22 @@ from ._parsing import (
 )
 from ._rasa import (
     count_action_inside_form,
-    get_current_search,
     get_entities,
     get_entity_values,
     get_intents,
     get_slot,
     handle_action_exceptions,
+    resolve_mentions,
+)
+from ._search import (
+    find_location,
+    find_parkings,
+    find_places,
+    get_place_title,
+    get_search_title,
+    is_user_location,
+    merge_locations,
+    validate_search_parameters,
 )
 
 __all__ = [
@@ -47,8 +56,6 @@ __all__ = [
     "pluralize",
     "singularize",
     "to_second_singular_person",
-    # _maps
-    "get_maps_client",
     # _misc
     "deserialize",
     "deserialize_iterable",
@@ -64,10 +71,19 @@ __all__ = [
     "parse_times",
     # _rasa
     "count_action_inside_form",
-    "get_current_search",
     "get_entities",
     "get_entity_values",
     "get_intents",
     "get_slot",
     "handle_action_exceptions",
+    "resolve_mentions",
+    # _search
+    "find_location",
+    "find_parkings",
+    "find_places",
+    "get_place_title",
+    "get_search_title",
+    "is_user_location",
+    "merge_locations",
+    "validate_search_parameters",
 ]

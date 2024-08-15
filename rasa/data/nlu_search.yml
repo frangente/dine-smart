@@ -1,7 +1,5 @@
 version: "3.1"
 
-# Intents related to the user searching for a place to eat/drink.
-
 nlu:
 
 # --------------------------------------------------------------------------- #
@@ -10,6 +8,7 @@ nlu:
 
 - intent: search_place_to_eat_now
   examples: |
+    - i am hungry
     - search for a place to eat now
     - i am hungry, where could I eat now?
     - i haven't eaten yet, i have a desperate need for food
@@ -39,6 +38,7 @@ nlu:
 
 - intent: search_place_to_drink_now
   examples: |
+    - i am thirsty
     - i am thirsty, where could I drink something now?
     - some [cocktails](cuisine_type) would be great right now
     - i want to drink something
@@ -57,6 +57,7 @@ nlu:
 
 - intent: search_place_now
   examples: |
+    - find a place where to go now
     - search to go now
     - start search for a place to go now
     - i am looking for a place to go now
@@ -100,6 +101,8 @@ nlu:
 
 - intent: search_place
   examples: |
+    - help me start a new search
+    - help me with a new search
     - search
     - i said search
     - i want to search
@@ -110,6 +113,10 @@ nlu:
     - start a new search
     - start searching
     - search for a place
+    - start search for a place called [il Cappello](place_name)
+    - could you lookup a place called [la Taverna](place_name) for me?
+    - search for a [restaurant](place_type) called [Il Caminetto](place_name)
+    - look if you can find a [bar](place_type) called [Duomo](place_name) in [Turin](location)
     - i am looking for a [restaurant](place_type) in [Ravenna](location)
     - i am looking for a [eatery](place_type), possibly near the [Colosseum](location)
     - tomorrow is my first day at work, i need to find a place where to have [lunch](meal_type) with my coworkers
@@ -152,6 +159,10 @@ nlu:
 
 - intent: inform_search
   examples: |
+    - a [restaurant](place_type) in [Rome, Italy](location)
+    - a [pub](place_type) thanks
+    - a [bistro](place_type)
+    - make sure that it has [pizza](cuisine_type)
     - it should be a [restaurant](place_type) that serves [italian](cuisine_type) food
     - it should be a simple [bar](place_type)
     - it should be in [Rome, Italy](location)
@@ -224,6 +235,7 @@ nlu:
 
 - intent: inform_price_range_expensive
   examples: |
+    - i want to spend a lot of money
     - select only the most expensive restaurants
     - i want to go to the most expensive restaurant in town
     - filter out all places that are not expensive
@@ -304,6 +316,9 @@ nlu:
 
 - intent: inform_quality_excellent
   examples: |
+    - it should be a very good place
+    - make sure that it is a top-notch [restaurant](place_type)
+    - it should be high-end
     - i only want to go to the best places
     - this is probably the most important dinner of my life, so it has to be the best
     - i cannot afford to go to a place that is high-endnot excellent
@@ -333,6 +348,8 @@ nlu:
 
 - intent: inform_quality_moderate
   examples: |
+    - it should be a good place
+    - it should be a decent [restaurant](place_type)
     - bad places and I are like oil and water, we don't mix
     - do not even try to suggest me a bad place
     - i don't want to go to a bad place
@@ -478,6 +495,7 @@ nlu:
 
 - intent: rank_results_by_relevance
   examples: |
+    - relevance
     - order by relevance
     - relevance order
     - sort the results by relevance
@@ -493,6 +511,7 @@ nlu:
 
 - intent: rank_results_by_distance
   examples: |
+    - distance
     - order by distance
     - distance order
     - sort the results by distance
@@ -527,3 +546,49 @@ nlu:
     - put the least touristy places first
     - sort the results by their price range
 
+- intent: show_search_parameters
+  examples: |
+    - what are the search parameters?
+    - what are the search criteria?
+    - could you tell me the search parameters?
+    - what are the search filters?
+    - what are the search constraints?
+    - list the search parameters
+    - list the search criteria
+    - tell me the search parameters
+    - any search constraints?
+    - what are the search options?
+    - what are the search settings?
+    - what are the search preferences?
+    - provide me the search parameters of the search
+    - what are the search filters of the search?
+    - what are the search parameters?
+    - search parameters
+    - search criteria
+    - search filters
+    - search options
+    - search settings
+    - search configuration
+    - search details
+    - search specifics
+    - list the search arguments
+    - show me the search parameters
+    - tell me the search criteria that are being used
+    - tell me the search filters that are being used
+    - any idea about the search options that are being used?
+
+- intent: show_search_results
+  examples: |
+    - show me the results
+    - list the results
+    - show the results
+    - display the results
+    - show me the results of the search
+    - list the results of the search
+    - show me the [next five](mention) results
+    - show me the [previous](mention) results
+    - show me the [next](mention) results
+    - show me the [first](mention) results
+    - show me the [last](mention) results
+    - display the [first three](mention) results
+    - select the [first three](mention) results

@@ -1,6 +1,3 @@
-# Copyright 2024 Francesco Gentile.
-# SPDX-License-Identifier: Apache-2.0
-
 version: "3.1"
 
 nlu:
@@ -65,23 +62,3 @@ nlu:
     - wipe out the [third](mention) search
     - delete [those](mention) searches
     - delete [selected](mention) search
-
-- intent: ask_search_parameters
-  examples: |
-    - what are the parameters of [this](mention) search?
-    - what are the search parameters?
-    - search parameters
-    - search criteria
-    - search filters
-    - search options
-    - search settings
-    - search configuration
-    - search details
-    - search specifics
-    - list the search arguments
-    - show me the search parameters
-    - tell me the search criteria that are being used
-    - tell me the search filters that are being used
-    - any idea about the search options that are being used?
-    - what are the search settings?
-    - what are the parameters of the [second](mention) search?

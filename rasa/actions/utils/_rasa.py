@@ -4,15 +4,14 @@
 """Utilities for Rasa."""
 
 import logging
-from typing import Any, Literal, TypedDict, overload
+from typing import Any, overload
 
 from rasa_sdk import Action, Tracker
-from rasa_sdk.events import ActionExecuted, Restarted, SlotSet
+from rasa_sdk.events import FollowupAction, Restarted, SlotSet
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.types import DomainDict
-from typing_extensions import NotRequired
 
-from rasa.shared.core.constants import ACTION_BACK_NAME, ACTION_DEACTIVATE_LOOP_NAME
+from rasa.shared.core.constants import ACTION_BACK_NAME
 from rasa.shared.nlu.constants import (
     ENTITIES,
     ENTITY_ATTRIBUTE_GROUP,
@@ -22,6 +21,9 @@ from rasa.shared.nlu.constants import (
     INTENT,
     INTENT_NAME_KEY,
 )
+
+from ._grammar import agree_with_number, int_to_ordinal, pluralize, singularize
+from ._parsing import parse_numbers, parse_ordinals
 
 _logger = logging.getLogger(__name__)
 
@@ -43,12 +45,9 @@ def handle_action_exceptions(x: type[Action]) -> type[Action]:
             num_errors = get_slot(tracker, "num_internal_errors", 0) + 1
 
             if num_errors < 3:
-                active_loop = tracker.active_loop
                 events = [SlotSet("num_internal_errors", num_errors)]
-                if not active_loop:
-                    events.append(ActionExecuted(ACTION_BACK_NAME))
-                else:
-                    events.append(ActionExecuted(ACTION_DEACTIVATE_LOOP_NAME))
+                dispatcher.utter_message(response="utter_internal_error")
+                events.append(FollowupAction(ACTION_BACK_NAME))
             else:
                 dispatcher.utter_message(response="utter_internal_error_max")
                 events = [Restarted()]
@@ -191,24 +190,160 @@ def count_action_inside_form(tracker: Tracker, action_name: str) -> int:
     return count
 
 
-class Search(TypedDict):
-    title: NotRequired[str]
-    title_given_by_user: NotRequired[bool]
-    rank_by: NotRequired[Literal["relevance", "distance"]]
-    open_now: NotRequired[bool]
-    location: NotRequired[dict[str, Any]]
-    place_name: NotRequired[str]
-    place_type: NotRequired[str]
-    primary_type: NotRequired[str]
-    cuisine_type: NotRequired[str]
-    price_range: NotRequired[str]
-    quality: NotRequired[str]
-    next_page_token: NotRequired[str]
-    results: NotRequired[list[dict[str, Any]]]
+_ALL_MENTIONED = [
+    "all",
+    "every",
+    "each",
+    "them",
+    "everything",
+    "these",
+    "those",
+    "their",
+    "theirs",
+    "they",
+    "themself",
+    "themselves",
+    "everyone",
+    "everybody",
+    "everything",
+]
 
 
-def get_current_search(tracker: Tracker) -> Search:
-    """Returns the current search from the search history."""
-    selected_searches = tracker.slots["selected_searches"]
-    search_history = tracker.slots.get("search_history", [])
-    return search_history[selected_searches[0]]
+async def resolve_mentions(  # noqa: C901, PLR0912, PLR0915
+    tracker: Tracker,
+    selected: list[int],
+    num_entities: int,
+    entity_type: str | list[str],
+    default_number: int = 5,
+) -> tuple[list[int], list[str]]:
+    text = tracker.latest_message.get("text", "").lower()
+    match entity_type:
+        case str():
+            entity_type = singularize(entity_type).lower()
+            entity_type_plural = pluralize(entity_type).lower()
+            relative = entity_type not in text
+            if entity_type_plural not in text:
+                default_number = 1
+        case list():
+            entity_type = [singularize(e).lower() for e in entity_type]
+            entity_type_plural = [pluralize(e).lower() for e in entity_type]
+            relative = all(e not in text for e in entity_type)
+            if all(e not in text for e in entity_type_plural):
+                default_number = 1
+
+            entity_type = entity_type[0]
+            entity_type_plural = entity_type_plural[0]
+
+    candidates = []
+    errors = []
+    for mention in get_entity_values(tracker, "mention"):
+        if any(word in mention for word in _ALL_MENTIONED):
+            if selected:
+                candidates.extend(selected)
+            else:
+                candidates.extend(range(num_entities))
+        elif "current" in mention or "selected" in mention:
+            if selected:
+                candidates.extend(selected)
+            else:
+                msg = f"you haven't selected any {entity_type} yet"
+                errors.append(msg)
+        elif "oldest" in mention or "first" in mention:
+            number = await parse_numbers(mention)
+            number = number[0] if number else (min(default_number, num_entities))
+            if relative and number <= len(selected):
+                candidates.extend(selected[:number])
+            elif number <= num_entities:
+                candidates.extend(range(number))
+            else:
+                msg = (
+                    f"there are only {num_entities} {entity_type_plural}, so I can't "
+                    f"select the first {number}"
+                )
+                errors.append(msg)
+        elif "last" in mention or "latest" in mention or "newest" in mention:
+            number = await parse_numbers(mention)
+            number = number[0] if number else (min(default_number, num_entities))
+            if relative and number <= len(selected):
+                candidates.extend(selected[-number:])
+            elif number <= num_entities:
+                candidates.extend(range(num_entities - number, num_entities))
+            else:
+                msg = (
+                    f"there are only {num_entities} {entity_type_plural}, so I can't "
+                    f"select the last {number}"
+                )
+                errors.append(msg)
+        elif "next" in mention:
+            current = max(selected)
+            number = await parse_numbers(mention)
+            number = (
+                number[0] if number else min(default_number, num_entities - current)
+            )
+            if len(selected) == 0:
+                msg = (
+                    f"you haven't selected any {entity_type} yet, so I can't "
+                    f"select the next {number}"
+                )
+                errors.append(msg)
+            elif current + number < num_entities:
+                candidates.extend(range(current + 1, current + number + 1))
+            else:
+                msg = (
+                    f"there are no more {entity_type_plural}, so I can't "
+                    f"select the next {number}"
+                )
+                errors.append(msg)
+        elif "previous" in mention:
+            current = min(selected)
+            number = await parse_numbers(mention)
+            number = number[0] if number else min(default_number, current)
+            if len(selected) == 0:
+                msg = (
+                    f"you haven't selected any {entity_type} yet, so I can't "
+                    f"select the previous {number}"
+                )
+                errors.append(msg)
+            elif current - number >= 0:
+                candidates.extend(range(current - number, current))
+            else:
+                msg = (
+                    f"there are no previous {entity_type_plural}, so I can't "
+                    f"select the previous {number}"
+                )
+                errors.append(msg)
+        else:
+            ordinal = await parse_ordinals(mention)
+            number = await parse_numbers(mention)
+            if not ordinal and not number:
+                continue
+
+            if not ordinal:
+                number = number[0]
+                if number < 1 or number > num_entities:
+                    msg = (
+                        f"there are only {num_entities} {entity_type_plural}, "
+                        f"so I can't select the {int_to_ordinal(number)} one"
+                    )
+                    errors.append(msg)
+                else:
+                    candidates.append(number - 1)
+            else:
+                ordinal = ordinal[0]
+                number = number[0] if number else default_number
+                start = (ordinal - 1) * number
+                end = start + number
+                if relative and end < len(selected):
+                    candidates.extend(selected[start:end])
+                elif end < num_entities:
+                    candidates.extend(range(start, end))
+                else:
+                    msg = (
+                        f"there are only {num_entities} {entity_type_plural}, "
+                        f"so I can't select the {int_to_ordinal(ordinal)} "
+                        f"{agree_with_number('one', end - start)}"
+                    )
+                    errors.append(msg)
+
+    candidates = sorted(set(candidates))
+    return candidates, errors

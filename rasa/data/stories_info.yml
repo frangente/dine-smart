@@ -1,0 +1,148 @@
+version: "3.1"
+
+stories:
+
+- story: the user asks details about given places but no search is active
+  steps:
+  - or:
+    - intent: ask_address
+    - intent: ask_contact
+    - intent: ask_price_level
+    - intent: ask_rating
+    - intent: ask_website
+    - intent: ask_allows_animals
+    - intent: ask_good_for_children
+    - intent: ask_parking_options
+    - intent: ask_payment_options
+    - intent: ask_outdoor_seating
+    - intent: ask_reservable
+    - intent: ask_restroom
+    - intent: ask_vegetarian
+    - intent: ask_takeout
+  - action: action_selected_searches_guard
+  - slot_was_set:
+    - selected_searches: []
+  - action: utter_no_search_selected
+  - action: utter_ask_which_search_to_select
+
+- story: the user asks details about given places but multiple searches are active
+  steps:
+  - or:
+    - intent: ask_address
+    - intent: ask_contact
+    - intent: ask_price_level
+    - intent: ask_rating
+    - intent: ask_website
+    - intent: ask_allows_animals
+    - intent: ask_good_for_children
+    - intent: ask_parking_options
+    - intent: ask_payment_options
+    - intent: ask_outdoor_seating
+    - intent: ask_reservable
+    - intent: ask_restroom
+    - intent: ask_vegetarian
+    - intent: ask_takeout
+  - action: action_selected_searches_guard
+  - slot_was_set:
+    - selected_searches: [1, 2, 3]
+  - action: utter_multiple_searches_selected
+  - action: utter_ask_which_search_to_select
+
+- story: the user asks details about given places
+  steps:
+  - or:
+    - intent: ask_address
+    - intent: ask_contact
+    - intent: ask_price_level
+    - intent: ask_rating
+    - intent: ask_website
+    - intent: ask_allows_animals
+    - intent: ask_good_for_children
+    - intent: ask_parking_options
+    - intent: ask_payment_options
+    - intent: ask_outdoor_seating
+    - intent: ask_reservable
+    - intent: ask_restroom
+    - intent: ask_vegetarian
+    - intent: ask_takeout
+  - action: action_selected_searches_guard
+  - slot_was_set:
+    - selected_searches: [1]
+  - action: action_check_search_parameters
+  - slot_was_set:
+    - all_required_parameters_set: true
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_retrieve_place_info
+
+- story: the user asks details about given places but there are not results for the search
+  steps:
+  - or:
+    - intent: ask_address
+    - intent: ask_contact
+    - intent: ask_price_level
+    - intent: ask_rating
+    - intent: ask_website
+    - intent: ask_allows_animals
+    - intent: ask_good_for_children
+    - intent: ask_parking_options
+    - intent: ask_payment_options
+    - intent: ask_outdoor_seating
+    - intent: ask_reservable
+    - intent: ask_restroom
+    - intent: ask_vegetarian
+    - intent: ask_takeout
+  - action: action_selected_searches_guard
+  - slot_was_set:
+    - selected_searches: [1]
+  - action: action_check_search_parameters
+  - slot_was_set:
+    - all_required_parameters_set: true
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: no_results
+  - action: utter_no_results
+
+- story: the user asks details about given places but provide the wrong indices
+  steps:
+  - or:
+    - intent: ask_address
+    - intent: ask_contact
+    - intent: ask_price_level
+    - intent: ask_rating
+    - intent: ask_website
+    - intent: ask_allows_animals
+    - intent: ask_good_for_children
+    - intent: ask_parking_options
+    - intent: ask_payment_options
+    - intent: ask_outdoor_seating
+    - intent: ask_reservable
+    - intent: ask_restroom
+    - intent: ask_vegetarian
+    - intent: ask_takeout
+  - action: action_selected_searches_guard
+  - slot_was_set:
+    - selected_searches: [1]
+  - action: action_check_search_parameters
+  - slot_was_set:
+    - all_required_parameters_set: true
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: wrong_indices
+  - action: utter_ask_which_results_to_show_2
+  - or:
+    - intent: show_search_results
+    - intent: select
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_retrieve_place_info
+  - intent: ask_previous_info
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_retrieve_place_info
+

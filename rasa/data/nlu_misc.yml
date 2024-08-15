@@ -82,6 +82,21 @@ nlu:
     - don't think that's a good idea
     - no, I changed my mind
 
+- intent: continue
+  examples: |
+    - no continue
+    - keep going
+    - proceed
+    - go on
+    - continue
+    - let's continue
+    - don't stop
+    - keep talking
+    - keep chatting
+    - keep the search going
+    - keep searching
+    - keep looking
+
 - intent: stop
   examples: |
     - stop
@@ -134,6 +149,19 @@ nlu:
     - what are you exactly?
     - who are you?
     - surely you are not a human
+
+- intent: help
+  examples: |
+    - help
+    - help me
+    - can you help me
+    - I need help
+    - can you help me with something
+    - i need your assistance
+    - can you assist me
+    - please help me
+    - i need some help
+    - i need your help
 
 - intent: inform_location
   examples: |
@@ -191,3 +219,65 @@ nlu:
     - i am going to the [church of Santa Chiara in Reggio di Caserta](location)
     - my train has just arrived to the [train station of Bologna](location)
     - I am the [bus stop of Via Rosmini in Trento](location)
+
+- intent: delete
+  examples: |
+    - delete
+    - remove
+    - delete the [first one](mention)
+    - delete the [first](mention) and the [second](mention)
+    - remove the [last one](mention)
+    - remove the [last](mention) and the [first](mention)
+    - delete the [oldest](mention)
+    - delete the [newest](mention)
+    - cancel the [third](mention)
+    - cancel the [third](mention) and the [fourth](mention)
+
+- intent: select
+  examples: |
+    - select
+    - choose
+    - pick
+    - select the [first one](mention)
+    - select the [first](mention) and the [second](mention)
+    - pick the [last one](mention)
+    - pick the [last](mention) and the [first](mention)
+    - select the [oldest](mention)
+    - select the [newest](mention)
+    - choose the [third](mention)
+    - choose the [third](mention) and the [fourth](mention)
+    - the [second](mention)
+    - the [third](mention)
+    - i meant the [first one](mention)
+    - the [first](mention) search
+    - no the [second](mention)
+    - the [last two](mention)
+    - the [second](mention) and the [third](mention)
+    - the [fourth](mention)
+    - the [second](mention) result
+    - the [third](mention) search
+    - the [first three](mention) searches
+
+- intent: out_of_scope
+  examples: |
+    - what is the meaning of life?
+    - what is the weather like?
+    - tell me a joke
+    - who is the president of the United States?
+    - what is the capital of Italy?
+    - what is the time?
+    - what is the date?
+    - what is the weather like in Milan?
+    - what is 2+2?
+    - i want to buy a car
+    - i want to buy a house
+    - is it sunny outside?
+    - what is the temperature?
+    - what is the stock price of Apple?
+    - help me invest in stocks
+    - what is the exchange rate of the euro?
+    - what is the population of France?
+    - any news?
+    - what is the latest news?
+    - what happened today?
+    - show me the news

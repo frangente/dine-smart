@@ -12,16 +12,22 @@ intents:
 - goodbye
 - affirm
 - deny
+- continue
 - stop
 - bot_challenge
+- help
 - inform_location
 - inform_my_location
+- delete
+- select
+- out_of_scope
 
 - show_search_history
 - clear_search_history
 - select_searches
 - delete_searches
-- ask_search_parameters
+- show_search_parameters
+- show_search_results
 
 - search_place_to_eat_now
 - search_place_to_drink_now
@@ -51,6 +57,22 @@ intents:
 - rank_results_by_distance
 - rank_results_by_unsupported
 
+- ask_address
+- ask_contact
+- ask_price_level
+- ask_rating
+- ask_website
+- ask_allows_animals
+- ask_good_for_children
+- ask_parking_options
+- ask_payment_options
+- ask_outdoor_seating
+- ask_reservable
+- ask_restroom
+- ask_vegetarian
+- ask_takeout
+- ask_previous_info
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 # ENTITIES
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -59,6 +81,7 @@ entities:
 - user_name
 - location
 - mention
+- place_name
 - place_type
 - cuisine_type
 - meal_type
@@ -110,23 +133,16 @@ slots:
     - type: custom
   
   selected_searches:
-    type: list
+    type: addons.slots.EmptySingleMultipleList
     influence_conversation: true
     mappings:
     - type: custom
   
-  selected_searches_buffer:
-    type: list
-    influence_conversation: true
-    mappings:
-    - type: custom
-
-  number_selected_searches:
+  selected_searches_error:
     type: categorical
     values:
-    - none
-    - single
-    - multiple
+    - not_specified
+    - wrong_indices
     influence_conversation: true
     mappings:
     - type: custom
@@ -134,12 +150,21 @@ slots:
   # ------------------------------------------------------------------------- #
   # SEARCH SLOTS
   # ------------------------------------------------------------------------- #
-  
-  location:
-    type: any
+
+  all_required_parameters_set:
+    type: bool
+    influence_conversation: true
+    mappings:
+    - type: custom
+
+  search_key:
+    type: text
     influence_conversation: false
     mappings:
     - type: custom
+      action: action_set_search_key
+      conditions:
+      - active_loop: search_form
 
   invalid_location:
     type: text
@@ -153,12 +178,6 @@ slots:
     mappings:
     - type: custom
 
-  place_type:
-    type: text
-    influence_conversation: false
-    mappings:
-    - type: custom
-
   invalid_place_type:
     type: bool
     influence_conversation: false
@@ -168,6 +187,15 @@ slots:
   selected_results:
     type: list
     influence_conversation: false
+    mappings:
+    - type: custom
+
+  selected_results_error:
+    type: categorical
+    values:
+    - wrong_indices
+    - no_results
+    influence_conversation: true
     mappings:
     - type: custom
 
@@ -194,32 +222,39 @@ slots:
 forms:
   search_form:
     required_slots:
-    - location
-    - place_type
+    - search_key
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 # ACTIONS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 actions:
-- action_session_start
 - action_greet
+- action_out_of_scope
+- action_session_start
+- action_restart
 
-- validate_search_form
-- action_validate_slot_mappings
-- action_ask_place_type
-- action_ask_location
+- action_search_history_guard
+- action_selected_searches_guard
+
+- action_set_search_key
+- action_ask_search_key
+- action_check_search_parameters
+- action_show_search_parameters
 - action_search
 - action_rank_results
+- action_set_selected_results
+- action_show_selected_results
 
 - action_show_search_history
 - action_clear_search_history
-- action_check_number_selected_searches
-- action_set_selected_searches
-- action_select_searches
-- action_confirm_delete_searches
-- action_delete_searches
 - action_start_search
+- action_show_selected_searches
+- action_ask_search_deletion
+- action_delete_searches
+- action_set_selected_searches
+
+- action_retrieve_place_info
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -229,7 +264,58 @@ actions:
 responses:
 
   # ------------------------------------------------------------------------- #
-  # MISCELLANEOUS
+  # ERROR HANDLING
+  # ------------------------------------------------------------------------- #
+
+  utter_out_of_scope:
+  - text: "Sorry, but I cannot help you with that. I can only search for places to eat or drink and make bookings."
+  - text: "Sorry, but I cannot help you with this query. I can only search for places to eat or drink and make bookings."
+  - text: "I am sorry, but I can only help you with finding places to eat or drink and making bookings."
+
+  utter_out_of_scope_gemini:
+  - text: |
+      Sorry, but I can only help you with finding places to eat or drink and making bookings. 
+      Still, to help you with that, I have forwarded your request to Google Gemini. 
+      Here is the response I got: {content}.
+
+  utter_ask_rephrase:
+  - text: "I'm sorry, I didn't understand that. Could you please rephrase it?"
+  - text: "Sorry, I didn't get that. Could you please rephrase it?"
+  - text: "I am sorry, but I didn't catch that. Could you please rephrase it?"
+
+  utter_default:
+  - text: "I'm sorry, it seems that I am not able to help you with that."
+  - text: "Sorry, I am not able to help you with that."
+  - text: "I am so sorry, but I am not able to help you with that."
+
+  utter_internal_error:
+  - text: "I'm sorry, I'm having trouble processing your request."
+  - text: "Sorry, I'm having some unexpected issues."
+  - text: "I am having some issues due to which I am unable to process your request."
+  - text: "Sorry but I am facing some issues."
+
+  utter_internal_error_max:
+  - text: "I'm sorry but it seems that something is broken. I am resetting the conversation and reporting the issue. Sorry for the inconvenience."
+  - text: "I'm still having trouble processing your request. Let's see whether starting from a clean slate helps. Sorry for the inconvenience."
+  - text: "Unfortunately, I am still facing issues. I am resetting the conversation and reporting the issue. Sorry for the inconvenience."
+
+  # ------------------------------------------------------------------------- #
+  # HELP
+  # ------------------------------------------------------------------------- #
+
+  utter_ask_help:
+  - text: "Sure, how can I help you?"
+  - text: "What can I do for you?"
+  - text: "How can I assist you?"
+
+  utter_ask_further_help:
+  - text: "Okay, is there anything else I can help you with?"
+  - text: "Can I at least help you with anything else?"
+  - text: "Perhaps, do you need help with anything else?"
+  - text: "Well, is there anything else I can assist you with?"
+
+  # ------------------------------------------------------------------------- #
+  # GREETINGS AND FAREWELLS
   # ------------------------------------------------------------------------- #
 
   utter_first_greet:
@@ -246,40 +332,77 @@ responses:
   - text: "Goodbye {user_name}! Have a nice day. Hope to see you soon."
   - text: "Bye {user_name}! I hope I was able to help you. Have a great day."
 
+  utter_goodbye_no_help:
+  - text: "Okay, but if you need help in the future, just ask. Goodbye!"
+  - text: "Okay, but if you need help in the future, don't hesitate to ask. Goodbye!"
+  - text: "Okay, but if you need help in the future, just let me know. Goodbye!"
+
   utter_introduction:
-  - text: "I am Dine-Smart, your personal digital assistant to assist you in all your dining needs."
-
-  utter_internal_error:
-  - text: "I'm sorry, I'm having trouble processing your request. Try something else or try again later."
-  - text: "Sorry, I'm having some unexpected issues. Try something else or try again later."
-  - text: "I am having some issues due to which I am unable to process your request. Try something else or try again later."
-  - text: "Sorry but I am facing some issues. Try something else or try again later."
-
-  utter_internal_error_max:
-  - text: "I'm sorry but it seems that something is broken. I am resetting the conversation and reporting the issue. Sorry for the inconvenience."
-  - text: "I'm still having trouble processing your request. Let's see whether starting from a clean slate helps. Sorry for the inconvenience."
-  - text: "Unfortunately, I am still facing issues. I am resetting the conversation and reporting the issue. Sorry for the inconvenience."
+  - text: "I am Dine-Smart, your digital assistant here to help you with all your dining needs."
 
   # ------------------------------------------------------------------------- #
   # SEARCH HISTORY
   # ------------------------------------------------------------------------- #
 
-  utter_empty_search_history:
-  - text: "You haven't done any searches yet."
-  - text: "You haven't searched for anything yet."
-  - text: "You don't have any searches yet."
-  - text: "Your search history is empty."
+  utter_empty_search_history_show:
+  - text: "Sorry, but you haven't done any searches yet."
+  - text: "I am sorry, but you haven't searched for anything yet."
+  - text: "Sorry but you don't have any searches yet."
+  - text: "I am sorry, but your search history is empty."
+
+  utter_empty_search_history_delete:
+  - text: "I am sorry, but you don't have any searches to delete."
+  - text: "Your search history is empty so there is nothing to delete."
+  - text: "Sorry, but I couldn't find any searches to delete."
+
+  utter_confirm_clear_search_history:
+  - text: "Are you sure you want to clear your search history? This action cannot be undone."
+  - text: "Are you sure you want to delete all your searches? You won't be able to recover them."
+  - text: "Are you sure you want to remove all your searches? This action is irreversible."
+
+  utter_cancel_clear_search_history:
+  - text: "Okay, I won't delete your searches."
+  - text: "Okay, your searches are safe."
+  - text: "Okay, no searches will be deleted."
 
   utter_cleared_search_history:
   - text: "Your search history has been successfully cleared."
   - text: "All your searches have been deleted."
   - text: "Okay, I have removed all your searches."
-  - text: "Your search activity is now empty."
+  - text: "Okay, your search activity is now empty."
 
-  utter_empty_search_history_no_delete:
-  - text: "I am sorry, but you don't have any searches to delete."
-  - text: "Your search history is empty so there is nothing to delete."
-  - text: "I couldn't find any searches to delete."
+  utter_ask_which_search_to_select:
+  - text: "Which search would you like to select?"
+  - text: "Which search do you want to select?"
+  - text: "Which search should I select for you?"
+
+  utter_ask_which_searches_to_select:
+  - text: "Which searches would you like to select?"
+  - text: "Which searches do you want to select?"
+  - text: "Which searches should I select for you?"
+
+  utter_ask_which_searches_to_select_2:
+  - text: "Could you please specify again which searches you want to select?"
+  - text: "Could you tell me again which searches you want to select?"
+
+  utter_ask_which_searches_to_delete:
+  - text: "Which searches would you like to delete?"
+  - text: "Which searches do you want to delete?"
+  - text: "Which searches should I delete for you?"
+
+  utter_ask_which_searches_to_delete_2:
+  - text: "Could you please specify again which searches you want to delete?"
+  - text: "Could you tell me again which searches you want to delete?"
+
+  utter_deleted_searches:
+  - text: "Okay, I have removed the selected searches."
+  - text: "As you command, the selected searches have been deleted."
+  - text: "It's done! The selected searches have been deleted."
+
+  utter_cancel_search_deletion:
+  - text: "Okay, I won't delete the selected searches."
+  - text: "Okay, the selected searches are safe."
+  - text: "Okay, no searches will be deleted."
 
   # ------------------------------------------------------------------------- #
   # SEARCH
@@ -290,19 +413,17 @@ responses:
   - text: "Do you want to start a new search now?"
   - text: "Shall we start a new search?"
 
-  utter_no_active_search:
+  utter_no_search_selected:
   - text: "Sorry there is no active search. Please select one or start a new search before proceeding."
   - text: "I can't proceed without knowing which search you are referring to. Please select one from your activity."
 
-  utter_multiple_active_searches:
+  utter_multiple_searches_selected:
   - text: "Sorry, but you have multiple selected searches so I can't proceed. Please select one to continue."
   - text: "I don't know which search you are referring to. Please select one from your activity."
 
   utter_started_search:
-  - text: "Starting a new search."
-  - text: "Let's start a new search."
-  - text: "Okay, let's start a new search."
-  - text: "Let's find a new place to go."
+  - text: "Okay, starting a new search."
+  - text: "Okay, I will start a new search."
 
   # place_type
   utter_ask_place_type:
@@ -357,7 +478,7 @@ responses:
   - text: "Sorry, but I found multiple results for {location}. Could you be more specific?"
   - text: "Sorry, but I wasn't able to precisely locate {location}. Could you provide more details?"
 
-  utter_ask_stop_search:
+  utter_inform_how_stop_search:
   - text: "If you don't want to keep searching, just say 'stop'."
   - text: "If you want to stop searching, just say 'stop'."
   - text: "If you no longer intend to search, just say 'stop'."
@@ -377,32 +498,36 @@ responses:
   - text: "Sorry, I can only order the results by relevance or distance. Please choose one of these options."
   - text: "I am sorry but I can only order the results based on relevance or distance."
 
+  utter_ask_stop_search:
+  - text: "Are you sure you want to stop the search?"
+  - text: "Do you really want to stop the search?"
+  - text: "Are you sure you want to end the search?"
+
+  utter_search_stopped:
+  - text: "Okay, I have stopped the search."
+  - text: "Okay, the current search has been stopped."
+  - text: "Okay, the current search has been suspended."
+
+  utter_ask_what_to_change:
+  - text: "Now you can tell me what you want to change."
+  - text: "Could you remind me what you want to change?"
+
   # ------------------------------------------------------------------------- #
-  # TO BE ORGANIZED
+  # SEARCH RESULTS
   # ------------------------------------------------------------------------- #
 
+  utter_ask_which_results_to_show_2:
+  - text: "Could you please specify again which results you want me to show?"
+  - text: "Could you tell me again which places you would like to select?"
 
-  utter_ask_how_can_help_2:
-  - text: "What can I do for you now?"
-  - text: "Can I help you in any other way?"
-  - text: "What else can I do for you?"
-  - text: "Is there anything else I can help you with?"
+  utter_missing_search_parameters:
+  - text: "Sorry, but not all the required parameters for this search have been set. Would you like to provide them now?"
+  - text: "Sorry, but I can't proceed with the search because some required parameters are missing. Would you like to provide them now?"
 
-
-  utter_cannot_select_empty:
-  - text: "You don't have any searches to select."
-  - text: "You don't have any searches to choose from."
-  - text: "You don't have any searches to select."
-
-
-  utter_deleted_searches:
-  - text: "Poof! Your searches have been deleted."
-  - text: "As you command, your searches have been deleted."
-  - text: "It's done! Your searches have been deleted."
-  - text: "Okay, I have removed the selected searches."
-
-
-
+  utter_no_results:
+  - text: "Sorry, but this search didn't return any results. Try changing the search parameters."
+  - text: "Sorry, but there are no results for this search. Maybe youcould try changing the search parameters."
+  
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 # SESSION CONFIGURATION
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
