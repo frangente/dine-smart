@@ -1,0 +1,106 @@
+version: "3.1"
+
+stories:
+
+# --------------------------------------------------------------------------- #
+# SHOW BOOKINGS
+# --------------------------------------------------------------------------- #
+
+- story: the user wants to see their bookings, but they do not specify which
+  steps:
+  - intent: show_bookings
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: no_selection
+  - action: utter_ask_which_bookings_to_select
+  - or:
+    - intent: select_bookings
+    - intent: select
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_show_selected_bookings
+
+- story: the user wants to see their bookings, but the selection is invalid
+  steps:
+  - intent: show_bookings
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: invalid_selection
+  - action: utter_ask_which_bookings_to_select_2
+  - or:
+    - intent: select_bookings
+    - intent: select
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_show_selected_bookings
+
+- story: the user wants to see their bookings, but no bookings were found with the given criteria
+  steps:
+  - or:
+    - intent: show_bookings
+    - intent: select_bookings
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: no_bookings_found
+  - action: utter_no_bookings_found
+  - or:
+    - intent: select_bookings
+    - intent: select
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_show_selected_bookings
+
+# --------------------------------------------------------------------------- #
+# DELETE BOOKINGS
+# --------------------------------------------------------------------------- #
+
+- story: the user wants to delete some bookings, but they do not specify any
+  steps:
+  - intent: delete_bookings
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: no_selection
+  - action: utter_ask_which_bookings_to_delete
+  - or:
+    - intent: delete_bookings
+    - intent: delete
+    - intent: select
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_confirm_delete_selected_bookings
+
+- story: the user wants to delete some bookings, but the selection is invalid
+  steps:
+  - intent: delete_bookings
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: invalid_selection
+  - action: utter_ask_which_bookings_to_delete_2
+  - or:
+    - intent: delete_bookings
+    - intent: delete
+    - intent: select
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_confirm_delete_selected_bookings
+
+- story: the user wants to delete some bookings, but no bookings were found with the given criteria
+  steps:
+  - intent: delete_bookings
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: no_bookings_found
+  - action: utter_no_bookings_found
+  - or:
+    - intent: delete_bookings
+    - intent: delete
+    - intent: select
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_confirm_delete_selected_bookings

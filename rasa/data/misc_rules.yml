@@ -16,8 +16,13 @@ rules:
   - intent: out_of_scope
   - action: action_out_of_scope
 
+- rule: inform the user that the bot cannot order food
+  steps:
+  - intent: order_food
+  - action: utter_cannot_order_food
+
 # --------------------------------------------------------------------------- #
-# GREETINGS, GOODBYES, AND HELP
+# GREETINGS, GOODBYES
 # --------------------------------------------------------------------------- #
 
 - rule: say hello anytime the user greets
@@ -36,22 +41,7 @@ rules:
   - intent: bot_challenge
   - action: utter_introduction
 
-- rule: ask the user how can help when the user asks for help
+- rule: states how you feel when the user asks
   steps:
-  - intent: help
-  - action: utter_ask_help
-
-- rule: ask the user how can help when the user asks for help
-  steps:
-  - action: utter_ask_further_help
-  - intent: affirm
-  - action: utter_ask_help
-
-- rule: say goodbye whenever the user does no longer need help
-  steps:
-  - action: utter_ask_further_help
-  - or:
-    - intent: deny
-    - intent: stop
-  - action: utter_goodbye_no_help
-  - action: action_session_start
+  - intent: ask_mood
+  - action: utter_mood

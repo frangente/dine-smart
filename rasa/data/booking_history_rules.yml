@@ -1,0 +1,89 @@
+version: "3.1"
+
+rules:
+
+# --------------------------------------------------------------------------- #
+# SHOW BOOKINGS
+# --------------------------------------------------------------------------- #
+
+- rule: the user wants to see their bookings
+  steps:
+  - intent: show_bookings
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_show_selected_bookings
+
+- rule: the user selects some bookings after seeing them
+  steps:
+  - action: action_show_selected_bookings
+  - or:
+    - intent: select_bookings
+    - intent: select
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_show_selected_bookings
+
+- rule: inform the user that there are no bookings
+  steps:
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: no_bookings
+  - action: utter_no_bookings
+
+- rule: the user moves to a new booking
+  steps:
+  - action: action_show_selected_results
+  - intent: select_bookings
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_show_selected_bookings
+
+# --------------------------------------------------------------------------- #
+# DELETE BOOKINGS
+# --------------------------------------------------------------------------- #
+
+- rule: the user wants to delete some bookings
+  steps:
+  - intent: delete_bookings
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_confirm_delete_selected_bookings
+
+- rule: the user first selects some bookings and then wants to delete them
+  steps:
+  - action: action_show_selected_bookings
+  - intent: delete
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_confirm_delete_selected_bookings
+
+- rule: delete bookings if the user confirm
+  steps:
+  - action: action_confirm_delete_selected_bookings
+  - or:
+    - intent: affirm
+    - intent: continue
+  - action: action_delete_selected_bookings
+  - action: utter_ask_further_help
+
+- rule: do not delete bookings if the user denies
+  steps:
+  - action: action_confirm_delete_selected_bookings
+  - or:
+    - intent: deny
+    - intent: stop
+  - action: utter_cancel_delete_selected_bookings
+  - action: utter_ask_further_help
+
+- rule: the user wants to delete some bookings, but there are none
+  steps:
+  - intent: delete_bookings
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: no_bookings
+  - action: utter_no_bookings

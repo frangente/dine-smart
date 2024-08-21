@@ -1,10 +1,11 @@
 # Copyright 2024 Francesco Gentile.
 # SPDX-License-Identifier: Apache-2.0
 
+import logging
 import os
 from typing import Any
 
-import aiohttp
+import requests
 
 from rasa.engine.graph import ExecutionContext, GraphComponent
 from rasa.engine.recipes.default_recipe import DefaultV1Recipe
@@ -12,10 +13,14 @@ from rasa.engine.storage.resource import Resource
 from rasa.engine.storage.storage import ModelStorage
 from rasa.shared.nlu.constants import METADATA, TEXT
 from rasa.shared.nlu.training_data.message import Message
+from rasa.shared.nlu.training_data.training_data import TrainingData
+
+_logger = logging.getLogger(__name__)
+_logger.setLevel(logging.DEBUG)
 
 
 @DefaultV1Recipe.register(
-    component_types=DefaultV1Recipe.ComponentType.MESSAGE_TOKENIZER,
+    component_types=DefaultV1Recipe.ComponentType.MESSAGE_FEATURIZER,
     is_trainable=False,
 )
 class SpellChecker(GraphComponent):
@@ -63,7 +68,7 @@ class SpellChecker(GraphComponent):
 
     @staticmethod
     def required_packages() -> list[str]:
-        return ["aiohttp"]
+        return ["requests"]
 
     @staticmethod
     def supported_languages() -> list[str] | None:
@@ -77,9 +82,13 @@ class SpellChecker(GraphComponent):
             "default_locale": "en-US",
         }
 
-    async def process(self, messages: list[Message]) -> list[Message]:
+    def process_training_data(self, training_data: TrainingData) -> TrainingData:
+        return training_data
+
+    def process(self, messages: list[Message]) -> list[Message]:
         for message in messages:
-            locale = message.get(METADATA, {}).get("locale")
+            medadata = message.get(METADATA) or {}
+            locale = medadata.get("locale")
             if locale is not None:
                 if locale not in _LOCALES:
                     msg = f"Unsupported locale '{locale}'."
@@ -89,7 +98,7 @@ class SpellChecker(GraphComponent):
 
             text = message.get(TEXT)
             if text is not None:
-                text = await _check_spelling(text, self._api_key, locale)
+                text = _check_spelling(text, self._api_key, locale)
                 message.set(TEXT, text)
 
         return messages
@@ -100,7 +109,7 @@ class SpellChecker(GraphComponent):
 # --------------------------------------------------------------------------- #
 
 
-async def _check_spelling(text: str, api_key: str, locale: str) -> str:
+def _check_spelling(text: str, api_key: str, locale: str) -> str:
     endpoint = "https://api.bing.microsoft.com/v7.0/spellcheck"
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -109,17 +118,17 @@ async def _check_spelling(text: str, api_key: str, locale: str) -> str:
     params = {"mode": "proof", "mkt": locale}
     data = {"text": text}
 
-    async with aiohttp.ClientSession() as session:
-        async with session.post(
-            endpoint,
-            headers=headers,
-            params=params,
-            data=data,
-        ) as response:
-            response.raise_for_status()
-            body = await response.json()
+    response = requests.post(
+        endpoint,
+        headers=headers,
+        params=params,
+        data=data,
+        timeout=5,
+    )
 
-    corrected = text
+    response.raise_for_status()
+    body = response.json()
+
     corrected = text
     for token in body["flaggedTokens"]:
         suggestion = token["suggestions"][0]["suggestion"]

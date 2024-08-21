@@ -1,0 +1,117 @@
+version: "3.1"
+
+rules:
+
+# --------------------------------------------------------------------------- #
+# START SEARCH
+# --------------------------------------------------------------------------- #
+
+- rule: do not start search if the user does not want to
+  steps:
+  - action: utter_ask_start_search
+  - or:
+    - intent: deny
+    - intent: stop
+  - action: utter_ask_further_help
+
+- rule: start search anytime the user wants to search
+  steps:
+  - action: utter_ask_start_search
+  - intent: affirm
+  - action: action_start_search
+  - action: search_form
+  - active_loop: search_form
+
+# --------------------------------------------------------------------------- #
+# SEARCH FORM
+# --------------------------------------------------------------------------- #
+
+- rule: start search anytime the user asks for a place to eat or drink
+  steps:
+  - or:
+    - intent: search_place_to_eat_now
+    - intent: search_place_to_drink_now
+    - intent: search_place_now
+    - intent: search_place_to_eat
+    - intent: search_place_to_drink
+    - intent: search_place
+  - action: action_start_search
+  - action: search_form
+  - active_loop: search_form
+
+- rule: search when all slots are filled
+  condition:
+  - active_loop: search_form
+  steps:
+  - action: search_form
+  - active_loop: null
+  - slot_was_set:
+    - requested_slot: null
+  - action: action_create_search
+  - action: action_search
+
+# --------------------------------------------------------------------------- #
+# MODIFY SEARCH
+# --------------------------------------------------------------------------- #
+
+- rule: activate search form when user wants to modify an existing search
+  condition:
+  - active_loop: null
+  steps:
+  - or:
+    - intent: inform_search
+    - intent: inform_price_range_any
+    - intent: inform_price_range_expensive
+    - intent: inform_price_range_moderate
+    - intent: inform_price_range_inexpensive
+    - intent: inform_quality_any
+    - intent: inform_quality_excellent
+    - intent: inform_quality_moderate
+    - intent: inform_price_range_any+inform_quality_any
+    - intent: inform_price_range_any+inform_quality_excellent
+    - intent: inform_price_range_any+inform_quality_moderate
+    - intent: inform_price_range_expensive+inform_quality_excellent
+    - intent: inform_price_range_moderate+inform_quality_any
+    - intent: inform_price_range_moderate+inform_quality_excellent
+    - intent: inform_price_range_moderate+inform_quality_moderate
+    - intent: inform_price_range_inexpensive+inform_quality_any
+    - intent: inform_price_range_inexpensive+inform_quality_excellent
+    - intent: inform_price_range_inexpensive+inform_quality_moderate
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_start_search
+  - action: search_form
+  - active_loop: search_form
+
+
+# --------------------------------------------------------------------------- #
+# PARAMETERS
+# --------------------------------------------------------------------------- #
+
+- rule: the user asks for the search parameters of the current search
+  steps:
+  - intent: show_search_parameters
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_show_search_parameters
+
+# --------------------------------------------------------------------------- #
+# RANK BY
+# --------------------------------------------------------------------------- #
+
+- rule: the user wants to change the order in which the results are ranked
+  steps:
+  - or:
+    - intent: rank_results_by_distance
+    - intent: rank_results_by_relevance
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_change_search_rank_by
+
+- rule: the user wants to rank results by a metric not supported
+  steps:
+  - intent: rank_results_by_unsupported
+  - action: utter_unsupported_rank_by

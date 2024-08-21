@@ -1,0 +1,96 @@
+version: "3.1"
+
+stories:
+
+# --------------------------------------------------------------------------- #
+# SHOW RESULTS
+# --------------------------------------------------------------------------- #
+
+- story: the user wants to see the results but no search is selected
+  steps:
+  - intent: show_results
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: zero
+  - action: utter_no_search_selected
+  - action: utter_ask_which_search_to_select
+  - or:
+    - intent: select_searches
+    - intent: select
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: utter_ask_which_results_to_select_2
+  - or:
+    - intent: select_results
+    - intent: select
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_show_selected_results
+
+- story: the user wants to see the results but multiple searches are selected
+  steps:
+  - intent: show_results
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: multiple
+  - action: utter_multiple_searches_selected
+  - action: utter_ask_which_search_to_select
+  - or:
+    - intent: select_searches
+    - intent: select
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: utter_ask_which_results_to_select_2
+  - or:
+    - intent: select_results
+    - intent: select
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_show_selected_results
+
+- story: the user wants to see the results but they do not select any
+  steps:
+  - intent: show_results
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: no_selection
+  - action: utter_ask_which_results_to_select
+  - or:
+    - intent: select_results
+    - intent: select
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_show_selected_results
+
+- story: the user wants to see the results but none were found with the given criteria
+  steps:
+  - intent: show_results
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: no_results_found
+  - action: utter_no_results_found
+  - or:
+    - intent: select_results
+    - intent: select
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_show_selected_results
+

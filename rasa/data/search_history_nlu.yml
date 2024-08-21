@@ -1,12 +1,12 @@
 version: "3.1"
 
 nlu:
-- intent: show_search_history
+- intent: show_searches
   examples: |
     - show me the search history
     - search history
     - show me my history of searches
-    - show me all searches I have done
+    - show me [all](mention) searches I have done
     - show me the history of searches
     - could you show me the search history?
     - what is my search history?
@@ -14,20 +14,16 @@ nlu:
     - what searches have I done?
     - what searches have I performed?
     - may I see my search activity?
-    - can you list all the searches that I have done?
-    - all searches I have done
+    - can you list [all](mention) the searches that I have done?
+    - [all](mention) searches I have done
     - list of searches I have done
-
-- intent: clear_search_history
-  examples: |
-    - clear the search history
-    - delete the search history
-    - remove the search history
-    - delete my search activity
-    - delete all searches
-    - remove all searches
-    - clear all searches
-    - clear all search history
+    - show me the [first](mention) search
+    - show me the [first two](mention) searches
+    - show me the [first](mention) and the [second](mention) search
+    - shoe me the [first](mention), the [second](mention) and the [third](mention) search
+    - show me the [1st](mention) search
+    - show me the [2nd](mention) search
+    - show me the [5th](mention) search
 
 - intent: select_searches
   examples: |
@@ -49,10 +45,16 @@ nlu:
     - [previous](mention) search
     - [next](mention) search
     - [first](mention) search
+    - select the [first](mention) and [second](mention) search
+    - select the [1st](mention) and [2nd](mention) searches
 
 - intent: delete_searches
   examples: |
     - delete search
+    - delete [all](mention) searches
+    - clear search history
+    - clear search activity
+    - wipe out my search history
     - delete [this](mention) search
     - remove [current](mention) search
     - delete the current search
@@ -62,3 +64,8 @@ nlu:
     - wipe out the [third](mention) search
     - delete [those](mention) searches
     - delete [selected](mention) search
+    - delete the [first](mention) and [second](mention) search
+    - delete the [1st](mention) and [2nd](mention) searches
+    - delete the [4th](mention) search
+    - delete the [5th](mention) search
+

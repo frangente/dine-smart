@@ -1,0 +1,90 @@
+version: "3.1"
+
+rules:
+
+# --------------------------------------------------------------------------- #
+# SHOW SEARCHES
+# --------------------------------------------------------------------------- #
+
+- rule: the user wants to see their searches
+  steps:
+  - intent: show_searches
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_show_selected_searches
+
+- rule: the user selects some searches after seeing them
+  steps:
+  - action: action_show_selected_searches
+  - or:
+    - intent: select_searches
+    - intent: select
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_show_selected_searches
+
+- rule: inform the user that there are no searches
+  steps:
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: no_searches
+  - action: utter_no_searches
+  - action: utter_ask_start_search
+
+- rule: the user moves to a new search
+  steps:
+  - action: action_show_selected_results
+  - intent: select_searches
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_show_selected_searches
+
+# --------------------------------------------------------------------------- #
+# DELETE SEARCHES
+# --------------------------------------------------------------------------- #
+
+- rule: the user wants to delete some searches
+  steps:
+  - intent: delete_searches
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_confirm_delete_selected_searches
+
+- rule: the user first selects some searches and then wants to delete them
+  steps:
+  - action: action_show_selected_searches
+  - intent: delete
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_confirm_delete_selected_searches
+
+- rule: delete searches if the user confirm
+  steps:
+  - action: action_confirm_delete_selected_searches
+  - or:
+    - intent: affirm
+    - intent: continue
+  - action: action_delete_selected_searches
+  - action: utter_ask_further_help
+
+- rule: do not delete searches if the user denies
+  steps:
+  - action: action_confirm_delete_selected_searches
+  - or:
+    - intent: deny
+    - intent: stop
+  - action: utter_cancel_delete_selected_searches
+  - action: utter_ask_further_help
+
+- rule: the user wants to delete some searches, but there are none
+  steps:
+  - intent: delete_searches
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: no_searches
+  - action: utter_no_searches

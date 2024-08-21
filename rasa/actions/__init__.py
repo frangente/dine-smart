@@ -3,32 +3,80 @@
 
 """Rasa custom actions for the chatbot."""
 
-from ._guards import SearchHistoryGuard, SelectedSearchesGuard
+from ._booking import (
+    AskBookingAuthor,
+    AskBookingDateTime,
+    AskBookingPeopleCount,
+    CancelBooking,
+    CheckFutureBooking,
+    CheckIsReservable,
+    CreateBooking,
+    SetBookingAuthor,
+    SetBookingDateTime,
+    SetBookingPeopleCount,
+    ShowBookingDetails,
+    StartBooking,
+    StateNotReservable,
+    SuggestBooking,
+)
+from ._booking_history import (
+    ConfirmDeleteSelectedBookings,
+    CountSelectedBookings,
+    DeleteSelectedBookings,
+    SetSelectedBookings,
+    ShowSelectedBookings,
+)
 from ._info import RetrievePlaceInfo
 from ._misc import Greet, OutOfScope, Restart, SessionStart
+from ._results import CountSelectedResults, SetSelectedResults, ShowSelectedResults
 from ._search import (
-    AskForSearchParameters,
-    CheckSearchParameters,
-    RankResults,
+    AskSearchLocation,
+    AskSearchPlaceType,
+    CancelSearch,
+    ChangeSearchRankBy,
+    CreateSearch,
     Search,
-    SetSearchParameters,
+    SearchParameters,
+    SetSearchActivity,
+    SetSearchLocation,
+    SetSearchOpenNow,
+    SetSearchPlaceType,
+    SetSearchPriceRange,
+    SetSearchQuality,
     ShowSearchParameters,
-    ShowSelectedResults,
+    StartSearch,
+    ValidateSearchForm,
 )
 from ._search_history import (
-    AskSearchDeletion,
-    ClearSearchHistory,
-    DeleteSearches,
+    ConfirmDeleteSelectedSearches,
+    CountSelectedSearches,
+    DeleteSelectedSearches,
     SetSelectedSearches,
-    ShowSearchHistory,
     ShowSelectedSearches,
-    StartSearch,
 )
 
 __all__ = [
-    # _guards
-    "SearchHistoryGuard",
-    "SelectedSearchesGuard",
+    # _booking
+    "AskBookingAuthor",
+    "AskBookingDateTime",
+    "AskBookingPeopleCount",
+    "CancelBooking",
+    "CheckFutureBooking",
+    "CheckIsReservable",
+    "CreateBooking",
+    "SetBookingAuthor",
+    "SetBookingDateTime",
+    "SetBookingPeopleCount",
+    "ShowBookingDetails",
+    "StartBooking",
+    "StateNotReservable",
+    "SuggestBooking",
+    # _booking_history
+    "ConfirmDeleteSelectedBookings",
+    "CountSelectedBookings",
+    "DeleteSelectedBookings",
+    "SetSelectedBookings",
+    "ShowSelectedBookings",
     # _info
     "RetrievePlaceInfo",
     # _misc
@@ -36,20 +84,31 @@ __all__ = [
     "OutOfScope",
     "Restart",
     "SessionStart",
-    # _search
-    "AskForSearchParameters",
-    "CheckSearchParameters",
-    "RankResults",
-    "Search",
-    "SetSearchParameters",
-    "ShowSearchParameters",
+    # _results
+    "CountSelectedResults",
+    "SetSelectedResults",
     "ShowSelectedResults",
-    # _search_history
-    "ClearSearchHistory",
-    "AskSearchDeletion",
-    "DeleteSearches",
-    "ShowSelectedSearches",
-    "SetSelectedSearches",
-    "ShowSearchHistory",
+    # _search
+    "AskSearchLocation",
+    "AskSearchPlaceType",
+    "CancelSearch",
+    "ChangeSearchRankBy",
+    "CreateSearch",
+    "Search",
+    "SearchParameters",
+    "SetSearchActivity",
+    "SetSearchLocation",
+    "SetSearchOpenNow",
+    "SetSearchPlaceType",
+    "SetSearchPriceRange",
+    "SetSearchQuality",
+    "ShowSearchParameters",
     "StartSearch",
+    "ValidateSearchForm",
+    # _search_history
+    "ConfirmDeleteSelectedSearches",
+    "CountSelectedSearches",
+    "DeleteSelectedSearches",
+    "SetSelectedSearches",
+    "ShowSelectedSearches",
 ]

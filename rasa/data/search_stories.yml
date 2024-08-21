@@ -1,0 +1,207 @@
+version: "3.1"
+
+stories:
+
+# --------------------------------------------------------------------------- #
+# SEARCH FORM
+# --------------------------------------------------------------------------- #
+
+- story: the user interrupts the search form and does not want to continue
+  steps:
+  - intent: search_place
+  - action: action_start_search
+  - action: search_form
+  - active_loop: search_form
+  - intent: stop
+  - action: utter_ask_stop_search
+  - or:
+    - intent: affirm
+    - intent: stop
+  - action: action_deactivate_loop
+  - active_loop: null
+  - action: action_cancel_search
+  - action: utter_ask_further_help
+
+- story: the user interrupts the search form but then wants to continue
+  steps:
+  - intent: search_place
+  - action: action_start_search
+  - action: search_form
+  - active_loop: search_form
+  - intent: stop
+  - action: utter_ask_stop_search
+  - or:
+    - intent: deny
+    - intent: continue
+  - action: search_form
+  - active_loop: search_form
+
+# --------------------------------------------------------------------------- #
+# MODIFY SEARCH
+# --------------------------------------------------------------------------- #
+
+- story: the user provides further information but no search is selected
+  steps:
+  - or:
+    - intent: inform_search
+    - intent: inform_price_range_any
+    - intent: inform_price_range_expensive
+    - intent: inform_price_range_moderate
+    - intent: inform_price_range_inexpensive
+    - intent: inform_quality_any
+    - intent: inform_quality_excellent
+    - intent: inform_quality_moderate
+    - intent: inform_price_range_any+inform_quality_any
+    - intent: inform_price_range_any+inform_quality_excellent
+    - intent: inform_price_range_any+inform_quality_moderate
+    - intent: inform_price_range_expensive+inform_quality_excellent
+    - intent: inform_price_range_moderate+inform_quality_any
+    - intent: inform_price_range_moderate+inform_quality_excellent
+    - intent: inform_price_range_moderate+inform_quality_moderate
+    - intent: inform_price_range_inexpensive+inform_quality_any
+    - intent: inform_price_range_inexpensive+inform_quality_excellent
+    - intent: inform_price_range_inexpensive+inform_quality_moderate
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: zero
+  - action: utter_no_search_selected
+  - action: utter_ask_which_search_to_select
+  - or:
+    - intent: select_searches
+    - intent: select
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: utter_ask_what_to_change_search
+
+- story: the user provides further information but multiple searches are selected
+  steps:
+  - or:
+    - intent: inform_search
+    - intent: inform_price_range_any
+    - intent: inform_price_range_expensive
+    - intent: inform_price_range_moderate
+    - intent: inform_price_range_inexpensive
+    - intent: inform_quality_any
+    - intent: inform_quality_excellent
+    - intent: inform_quality_moderate
+    - intent: inform_price_range_any+inform_quality_any
+    - intent: inform_price_range_any+inform_quality_excellent
+    - intent: inform_price_range_any+inform_quality_moderate
+    - intent: inform_price_range_expensive+inform_quality_excellent
+    - intent: inform_price_range_moderate+inform_quality_any
+    - intent: inform_price_range_moderate+inform_quality_excellent
+    - intent: inform_price_range_moderate+inform_quality_moderate
+    - intent: inform_price_range_inexpensive+inform_quality_any
+    - intent: inform_price_range_inexpensive+inform_quality_excellent
+    - intent: inform_price_range_inexpensive+inform_quality_moderate
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: multiple
+  - action: utter_multiple_searches_selected
+  - action: utter_ask_which_search_to_select
+  - or:
+    - intent: select_searches
+    - intent: select
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: utter_ask_what_to_change_search
+
+# --------------------------------------------------------------------------- #
+# PARAMETERS
+# --------------------------------------------------------------------------- #
+
+- story: the user asks for the search parameters but no search is selected
+  steps:
+  - intent: show_search_parameters
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: zero
+  - action: utter_no_search_selected
+  - action: utter_ask_which_search_to_select
+  - or:
+    - intent: select_searches
+    - intent: select
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_show_search_parameters
+
+- story: the user asks for the search parameters but multiple searches are selected
+  steps:
+  - intent: show_search_parameters
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: multiple
+  - action: utter_multiple_searches_selected
+  - action: utter_ask_which_search_to_select
+  - or:
+    - intent: select_searches
+    - intent: select
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_show_search_parameters
+
+# --------------------------------------------------------------------------- #
+# RANK BY
+# --------------------------------------------------------------------------- #
+
+- story: |
+    the user wants to change the order in which the results are ranked, 
+    but no search is selected
+  steps:
+  - or:
+    - intent: rank_results_by_distance
+    - intent: rank_results_by_relevance
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: zero
+  - action: utter_no_search_selected
+  - action: utter_ask_which_search_to_select
+  - or:
+    - intent: select_searches
+    - intent: select
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_change_search_rank_by
+
+- story: |
+    the user wants to change the order in which the results are ranked, 
+    but multiple searches are selected
+  steps:
+  - or:
+    - intent: rank_results_by_distance
+    - intent: rank_results_by_relevance
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: multiple
+  - action: utter_multiple_searches_selected
+  - action: utter_ask_which_search_to_select
+  - or:
+    - intent: select_searches
+    - intent: select
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_change_search_rank_by

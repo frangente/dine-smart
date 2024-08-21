@@ -1,0 +1,63 @@
+version: "3.1"
+
+nlu:
+- intent: show_results
+  examples: |
+    - show me the results
+    - list the results
+    - show the results
+    - display the results
+    - show me the [first](mention) and [third](mention) results
+    - show me [all](mention) the results
+    - show me the results of the search
+    - list the results of the search
+    - show me the [next five](mention) places
+    - show me the [previous](mention) results
+    - show me the [next](mention) places
+    - show me the [first](mention) results
+    - show me the [last](mention) results
+    - display the [first three](mention) results
+    - select the [first three](mention) results
+    - make me see the [first](mention) and [second](mention) results
+    - display the [second](mention), [third](mention) and [fourth](mention) results
+    - show me the [1st](mention) result
+    - show me the [1st 3](mention) results
+    - show me the [1st](mention) and [2nd](mention) result
+
+- intent: select_results
+  examples: |
+    - select the [first](mention) result
+    - choose the [second](mention) result
+    - select result number [3](mention)
+    - pick the [first two](mention) places
+    - select [all](mention) results
+    - go to the [fourth](mention) result
+    - go to result [5](mention)
+    - select the [last five](mention) results
+    - pick the [last](mention) result
+    - select the [last](mention) place
+    - move to the [next](mention) result
+    - move to the [previous](mention) result
+    - load the [next two](mention) results
+    - start the [previous](mention) result
+    - select the [2nd](mention) result
+    - select the [1st 2](mention) results
+    - select the [1st](mention) and [2nd](mention) result
+
+- intent: delete_results
+  examples: |
+    - delete the [first](mention) result
+    - remove the [second](mention) result
+    - delete result number [3](mention)
+    - cancel the [first two](mention) results
+    - delete [all](mention) results
+    - wipe out the [fourth](mention) result
+    - remove [all](mention) results
+    - delete the [last](mention) result
+    - do not show the [last](mention) result
+    - do not make me see the [next](mention) result
+    - delete the [previous](mention) result
+    - delete the [second](mention) and [third](mention) results
+    - delete the [1st 3](mention) results
+    - delete the [1st](mention) and [2nd](mention) result
+

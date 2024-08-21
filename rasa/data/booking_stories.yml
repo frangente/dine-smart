@@ -1,0 +1,338 @@
+version: "3.1"
+
+stories:
+
+# --------------------------------------------------------------------------- #
+# BOOKING FORM
+# --------------------------------------------------------------------------- #
+
+- story: the user interrupts the booking form and does not want to continue
+  steps:
+  - intent: book_result
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_count_selected_results
+  - slot_was_set:
+    - selected_results_count: one
+  - action: action_check_is_reservable
+  - slot_was_set:
+    - is_reservable: true
+  - action: action_start_booking
+  - action: booking_form
+  - active_loop: booking_form
+  - intent: stop
+  - action: utter_ask_stop_booking
+  - or:
+    - intent: affirm
+    - intent: stop
+  - action: action_deactivate_loop
+  - active_loop: null
+  - action: action_cancel_booking
+  - action: utter_ask_further_help
+
+- story: the user interrupts the booking form but then wants to continue
+  steps:
+  - intent: book_result
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_count_selected_results
+  - slot_was_set:
+    - selected_results_count: one
+  - action: action_check_is_reservable
+  - slot_was_set:
+    - is_reservable: true
+  - action: action_start_booking
+  - action: booking_form
+  - active_loop: booking_form
+  - intent: stop
+  - action: utter_ask_stop_booking
+  - or:
+    - intent: deny
+    - intent: continue
+  - action: booking_form
+  - active_loop: booking_form
+
+- story: the user asks when the place they are booking is open
+  steps:
+  - intent: book_result
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_count_selected_results
+  - slot_was_set:
+    - selected_results_count: one
+  - action: action_check_is_reservable
+  - slot_was_set:
+    - is_reservable: true
+  - action: action_start_booking
+  - action: booking_form
+  - active_loop: booking_form
+  - intent: ask_opening_hours
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_retrieve_place_info
+  - action: booking_form
+  - active_loop: booking_form
+
+- story: the user wants to start the booking but there are no results
+  steps:
+  - intent: book_result
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: no_results
+  - action: utter_no_results
+
+- story: the user wants to start the booking but no result is selected
+  steps:
+  - intent: book_result
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: no_selection
+  - action: utter_ask_which_result_to_book
+  - or:
+    - intent: select_results
+    - intent: select
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_count_selected_results
+  - slot_was_set:
+    - selected_results_count: one
+  - action: action_check_is_reservable
+  - slot_was_set:
+    - is_reservable: true
+  - action: action_start_booking
+  - action: booking_form
+  - active_loop: booking_form
+
+- story: the user wants to start the booking but the selection is invalid
+  steps:
+  - intent: book_result
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: invalid_selection
+  - action: utter_ask_which_result_to_book
+  - or:
+    - intent: select_results
+    - intent: select
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_count_selected_results
+  - slot_was_set:
+    - selected_results_count: one
+  - action: action_check_is_reservable
+  - slot_was_set:
+    - is_reservable: true
+  - action: action_start_booking
+  - action: booking_form
+  - active_loop: booking_form
+
+- story: the user wants to start the booking but no result is found with the given criteria
+  steps:
+  - intent: book_result
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: no_results_found
+  - action: utter_no_results_found
+  - or:
+    - intent: select_results
+    - intent: select
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_count_selected_results
+  - slot_was_set:
+    - selected_results_count: one
+  - action: action_check_is_reservable
+  - slot_was_set:
+    - is_reservable: true
+  - action: action_start_booking
+  - action: booking_form
+  - active_loop: booking_form
+
+- story: the user wants to start the booking but multiple results are selected
+  steps:
+  - intent: book_result
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_count_selected_results
+  - slot_was_set:
+    - selected_results_count: multiple
+  - action: utter_ask_select_one_result_to_book
+  - or:
+    - intent: select_results
+    - intent: select
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_count_selected_results
+  - slot_was_set:
+    - selected_results_count: one
+  - action: action_check_is_reservable
+  - slot_was_set:
+    - is_reservable: true
+  - action: action_start_booking
+  - action: booking_form
+  - active_loop: booking_form
+
+# --------------------------------------------------------------------------- #
+# MODIFY BOOKING
+# --------------------------------------------------------------------------- #
+
+- story: the user wants to modify a booking but none is selected
+  steps:
+  - intent: inform_booking
+  - action: action_count_selected_bookings
+  - slot_was_set:
+    - selected_bookings_count: zero
+  - action: utter_ask_select_booking_to_modify
+  - or:
+    - intent: select_bookings
+    - intent: select
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_count_selected_bookings
+  - slot_was_set:
+    - selected_bookings_count: one
+  - action: action_check_future_booking
+  - slot_was_set:
+    - is_future_booking: true
+  - action: utter_ask_what_to_change_booking
+
+- story: the user wants to modify a booking but none is selected (past booking)
+  steps:
+  - intent: inform_booking
+  - action: action_count_selected_bookings
+  - slot_was_set:
+    - selected_bookings_count: zero
+  - action: utter_ask_select_booking_to_modify
+  - or:
+    - intent: select_bookings
+    - intent: select
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_count_selected_bookings
+  - slot_was_set:
+    - selected_bookings_count: one
+  - action: action_check_future_booking
+  - slot_was_set:
+    - is_future_booking: false
+  - action: utter_cannot_modify_past_booking
+
+- story: the user wants to modify a booking but multiple are selected
+  steps:
+  - intent: inform_booking
+  - action: action_count_selected_bookings
+  - slot_was_set:
+    - selected_bookings_count: multiple
+  - action: utter_ask_select_one_booking_to_modify
+  - or:
+    - intent: select_bookings
+    - intent: select
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_count_selected_bookings
+  - slot_was_set:
+    - selected_bookings_count: one
+  - action: action_check_future_booking
+  - slot_was_set:
+    - is_future_booking: true
+  - action: utter_ask_what_to_change_booking
+
+- story: the user wants to modify a booking but multiple are selected (past booking)
+  steps:
+  - intent: inform_booking
+  - action: action_count_selected_bookings
+  - slot_was_set:
+    - selected_bookings_count: multiple
+  - action: utter_ask_select_one_booking_to_modify
+  - or:
+    - intent: select_bookings
+    - intent: select
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_count_selected_bookings
+  - slot_was_set:
+    - selected_bookings_count: one
+  - action: action_check_future_booking
+  - slot_was_set:
+    - is_future_booking: false
+  - action: utter_cannot_modify_past_booking
+
+# --------------------------------------------------------------------------- #
+# PARAMETERS
+# --------------------------------------------------------------------------- #
+
+- story: the user wants to see the booking details but no booking is selected
+  steps:
+  - intent: show_booking_details
+  - action: action_count_selected_bookings
+  - slot_was_set:
+    - selected_bookings_count: zero
+  - action: utter_no_booking_selected
+  - action: utter_ask_select_booking_to_select
+  - or:
+    - intent: select_bookings
+    - intent: select
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_count_selected_bookings
+  - slot_was_set:
+    - selected_bookings_count: one
+  - action: action_show_booking_details
+
+- story: the user wants to see the booking details but multiple bookings are selected
+  steps:
+  - intent: show_booking_details
+  - action: action_count_selected_bookings
+  - slot_was_set:
+    - selected_bookings_count: multiple
+  - action: utter_multiple_bookings_selected
+  - action: utter_ask_select_booking_to_select
+  - or:
+    - intent: select_bookings
+    - intent: select
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_count_selected_bookings
+  - slot_was_set:
+    - selected_bookings_count: one
+  - action: action_show_booking_details

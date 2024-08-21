@@ -29,7 +29,7 @@ class AlexaConnector(InputChannel):
         self,
         on_new_message: Callable[[UserMessage], Awaitable[Any]],
     ) -> Blueprint:
-        webhook = Blueprint("alexa_webhook_{}", __name__)
+        webhook = Blueprint("alexa_webhook", __name__)
 
         @webhook.route("/", methods=["GET"])
         async def health(_request: Request) -> HTTPResponse:  # type: ignore
@@ -39,19 +39,49 @@ class AlexaConnector(InputChannel):
         async def receive(request: Request) -> HTTPResponse:  # type: ignore
             message, end_session = await _handle_request(request, on_new_message)
 
+            # convert the message to SSML
+            parts = message.split("\n")
+            msg = "<speak>"
+            for idx, part in enumerate(parts):
+                if part.startswith("-"):
+                    # if it starts with a number followed by a dot
+                    # add a pause before the text
+                    if idx == 0:
+                        msg += "<p>"
+                    else:
+                        msg += "<break time='500ms'/>"
+                    msg += f"<s>{part}</s>"
+                elif part[0].isnumeric():
+                    if idx > 0:
+                        msg += "<break time='500ms'/>"
+
+                    number, text = part.split(".", 1)
+                    msg += f"<s>{number}.<break time='500ms'/>{text}</s>"
+                else:
+                    if idx > 0:
+                        msg += "</p>"
+
+                    msg += f"<p><s>{part}</s>"
+            msg += "</p></speak>"
+
+            escapes = "".join([chr(char) for char in range(1, 32)])
+            translator = str.maketrans("", "", escapes)
+            msg = msg.translate(translator)
+            msg = msg.replace("&", "and")
+
             r = {
                 "version": "1.0",
                 "sessionAttributes": {"status": "test"},
                 "response": {
                     "outputSpeech": {
-                        "type": "PlainText",
-                        "text": message,
+                        "type": "SSML",
+                        "ssml": msg,
                         "playBehavior": "REPLACE_ENQUEUED",
                     },
                     "reprompt": {
                         "outputSpeech": {
-                            "type": "PlainText",
-                            "text": message,
+                            "type": "SSML",
+                            "ssml": msg,
                             "playBehavior": "REPLACE_ENQUEUED",
                         }
                     },
@@ -63,7 +93,7 @@ class AlexaConnector(InputChannel):
         return webhook
 
 
-async def _handle_request(
+async def _handle_request(  # noqa: C901, PLR0912
     request: Request,
     on_new_message: Callable[[UserMessage], Awaitable[Any]],
 ) -> tuple[str, bool]:
@@ -76,119 +106,71 @@ async def _handle_request(
         return message, end_session
 
     locale = payload["request"]["locale"]
-    intent_type = payload["request"]["type"]
-    session_object = payload.get("session", {})
-    session_id = session_object.get("sessionId")
-    user_id = session_object.get("user", {}).get("userId")
-    sender_id = user_id + session_id
+    if not locale.startswith("en"):
+        message = "Sorry, this skill only supports English."
+        end_session = True
+        return message, end_session
+
+    user_id = payload["session"]["user"]["userId"]
 
     match payload["request"]["type"]:
         case "CanFulfillIntentRequest":
+            # Alexa is asking if the skill can fulfill the intent
+            # we don't support this yet
             raise NotImplementedError
         case "LaunchRequest":
             # if the user is starting the skill, create a fake
             # intent to trigger the welcome message
             text = "hi"
+            end_session = False
         case "IntentRequest":
-            text = payload["request"]["intent"]["slots"]["text"]["value"]
+            intent = payload["request"]["intent"]["name"]
+            match intent:
+                case "AMAZON.StopIntent":
+                    text = "goodbye"
+                    end_session = True
+                case "AMAZON.HelpIntent":
+                    text = "help"
+                    end_session = False
+                case "AMAZON.CancelIntent":
+                    text = "cancel"
+                    end_session = False
+                case "ReturnUserInput":
+                    text = payload["request"]["intent"]["slots"]["text"]["value"]
+                    end_session = False
+                case _:
+                    message = "Could you please repeat that?"
+                    end_session = False
+                    return message, end_session
         case "SessionEndedRequest":
             # if the user is ending the skill, create a fake
             # intent to let Rasa know the user is leaving
             text = "goodbye"
-        case _:
-            pass
-
-    # if the user is starting the skill, let them
-    # know it worked & what to do next
-    if intent_type == "LaunchRequest":
-        message = (
-            "Hello! Welcome to this Rasa-powered Alexa skill. "
-            "You can start by saying 'hi'."
-        )
-        end_session = False
-    else:
-        # get the Alexa-detected intent
-        intent = payload["request"].get("intent", {}).get("name", "")
-
-        # makes sure the user isn't trying to
-        # end the skill
-        if intent == "AMAZON.StopIntent":
             end_session = True
-            message = "Talk to you later"
-        else:
-            # get the user-provided text from
-            # the slot named "text"
-            text = (
-                payload["request"]
-                .get("intent", {})
-                .get("slots", {})
-                .get("text", {})
-                .get("value", "")
-            )
+        case _:
+            msg = f"Unsupported request type '{payload['request']['type']}'."
+            raise RuntimeError(msg)
 
-            # initialize output channel
-            out = CollectingOutputChannel()
+    out = CollectingOutputChannel()
 
-            metadata = {"locale": locale}
+    metadata = {"locale": locale}
 
-            # send the user message to Rasa &
-            # wait for the response
-            await on_new_message(
-                UserMessage(
-                    text=text,
-                    output_channel=out,
-                    sender_id=sender_id,
-                    metadata=metadata,
-                )
-            )
-            # extract the text from Rasa's response
-            responses = [m["text"] for m in out.messages]
-            if len(responses) > 0:
-                message = " ".join(responses)
-            else:
-                message = "Sorry, can you repeat that please?"
-                _logger.error("No response returned from the Rasa server.")
-            end_session = False
+    # send the user message to Rasa &
+    # wait for the response
+    await on_new_message(
+        UserMessage(
+            text=text,
+            output_channel=out,
+            sender_id=user_id,
+            metadata=metadata,
+        )
+    )
+    # extract the text from Rasa's response
+    responses = [m["text"] for m in out.messages]
+    if len(responses) > 0:
+        message = "\n".join(responses)
+    else:
+        message = "Sorry, can you repeat that please?"
+        _logger.error("No response returned from the Rasa server.")
 
     return message, end_session
-
-
-# --------------------------------------------------------------------------- #
-# Private API
-# --------------------------------------------------------------------------- #
-
-_LOCALES = {
-    "ar-SA",
-    "de-DE",
-    "en-AU",
-    "en-CA",
-    "en-GB",
-    "en-IN",
-    "en-US",
-    "es-ES",
-    "es-MX",
-    "es-US",
-    "fr-CA",
-    "fr-FR",
-    "hi-IN",
-    "it-IT",
-    "ja-JP",
-    "pt-BR",
-}
-
-
-def _match_locales(locale: str) -> list[str]:
-    """Returns the standard locales that match the given locale."""
-    if "-" in locale:
-        if locale not in _LOCALES:
-            msg = f"Unsupported locale '{locale}'."
-            raise ValueError(msg)
-
-        return [locale]
-
-    languages = {locale.split("-")[0] for locale in _LOCALES}
-    if locale not in languages:
-        msg = f"Unsupported locale '{locale}'."
-        raise ValueError(msg)
-
-    return [loc for loc in _LOCALES if loc.startswith(locale)]

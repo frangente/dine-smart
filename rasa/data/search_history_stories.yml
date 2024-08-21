@@ -1,0 +1,106 @@
+version: "3.1"
+
+stories:
+
+# --------------------------------------------------------------------------- #
+# SHOW SEARCHES
+# --------------------------------------------------------------------------- #
+
+- story: the user wants to see their searches, but they do not specify which
+  steps:
+  - intent: show_searches
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: no_selection
+  - action: utter_ask_which_searches_to_select
+  - or:
+    - intent: select_searches
+    - intent: select
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_show_selected_searches
+
+- story: the user wants to see their searches, but the selection is invalid
+  steps:
+  - intent: show_searches
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: invalid_selection
+  - action: utter_ask_which_searches_to_select_2
+  - or:
+    - intent: select_searches
+    - intent: select
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_show_selected_searches
+
+- story: the user wants to see their searches, but no searches were found with the given criteria
+  steps:
+  - or:
+    - intent: show_searches
+    - intent: select_searches
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: no_searches_found
+  - action: utter_no_searches_found
+  - or:
+    - intent: select_searches
+    - intent: select
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_show_selected_searches
+
+# --------------------------------------------------------------------------- #
+# DELETE SEARCHES
+# --------------------------------------------------------------------------- #
+
+- story: the user wants to delete some searches, but they do not specify any
+  steps:
+  - intent: delete_searches
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: no_selection
+  - action: utter_ask_which_searches_to_delete
+  - or:
+    - intent: delete_searches
+    - intent: delete
+    - intent: select
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_confirm_delete_selected_searches
+
+- story: the user wants to delete some searches, but the selection is invalid
+  steps:
+  - intent: delete_searches
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: invalid_selection
+  - action: utter_ask_which_searches_to_delete_2
+  - or:
+    - intent: delete_searches
+    - intent: delete
+    - intent: select
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_confirm_delete_selected_searches
+
+- story: the user wants to delete some searches, but no searches were found with the given criteria
+  steps:
+  - intent: delete_searches
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: no_searches_found
+  - action: utter_no_searches_found
+  - or:
+    - intent: delete_searches
+    - intent: delete
+    - intent: select
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_confirm_delete_selected_searches

@@ -4,6 +4,7 @@ nlu:
 
 - intent: ask_address
   examples: |
+    - what is the address of the [first two](mention)?
     - where is [it](mention) located?
     - what is [its](mention) address?
     - where can i find [it](mention)?
@@ -20,6 +21,10 @@ nlu:
     - where is the [first one](mention)?
     - could you tell me where the [second](mention) is?
     - could you tell me where i can find the [third one](mention)?
+    - where is the [1st](mention) one?
+    - where are the [first two](mention) results located?
+    - any idea about the location of the [2nd](mention) place?
+    - where can I find the [3rd](mention) result?
 
 - intent: ask_contact
   examples: |
@@ -35,6 +40,10 @@ nlu:
     - how can I contact the [last two](mention)?
     - tell me the phone number of the [third](mention) and [fourth](mention) one?
     - could you repeat the phone number of the [first](mention) one?
+    - what is the phone number of the [2nd](mention) and [3rd](mention) one?
+    - how can I call the [first two](mention) results?
+    - tell me how to contact the [first](mention) place?
+    - what is the phone number of the [2nd](mention) place?
 
 - intent: ask_price_level
   examples: |
@@ -50,6 +59,10 @@ nlu:
     - what is the price range?
     - could you tell me whether [it](mention) is expensive?
     - could you tell me whether [they](mention) are affordable?
+    - is the [2d](mention) more expensive than the [3rd](mention)?
+    - how much does the [4th](mention) result cost?
+    - it the [second](mention) result affordable?
+    - is the [first](mention) place cheap or expensive?
 
 - intent: ask_rating
   examples: |
@@ -67,6 +80,15 @@ nlu:
     - do people recommend [them](mention)?
     - could you tell me whether [they](mention) are well rated?
     - would you recommend the [last](mention) one?
+    - rating status of the [last](mention) one?
+    - rating stars of the [first](mention)?
+    - how people rate the [second](mention)?
+    - how good are the reviews of the [third](mention)?
+    - is the [1st](mention) well rated?
+    - is the [1st](mention) better rated than the [2nd](mention)?
+    - how customers review the [third](mention) result?
+    - any idea about the reviews left by customers for the [4th](mention) place?
+    - what is the rating of the [5th](mention) place?
 
 - intent: ask_website
   examples: |
@@ -82,6 +104,11 @@ nlu:
     - does [it](mention) have a website?
     - could you tell me the [first one](mention) website?
     - could you tell me whether the [second](mention) has a website?
+    - what is the website of the [3rd](mention)?
+    - any info about the website of the [4th](mention) result
+    - what is the website of the [5th](mention) place?
+    - tell me the website of the [last one](mention)
+    - what is the website of the [1st](mention) place?
 
 - intent: ask_allows_animals
   examples: |
@@ -96,8 +123,15 @@ nlu:
     - does the [second one](mention) have a pet policy?
     - can I bring my pet to the [third](mention)?
     - are there any restrictions on animals in the [fourth](mention)?
-    - is it a problem if I bring my dog to the [fifth](mention)?
+    - is it a problem if I bring my dog to the [fifth](mention) result?
     - is it okay to brink an animal to the [last one](mention)?
+    - are animals allowed in the [last one](mention)?
+    - are animals welcome in the [first one](mention)?
+    - could you tell me whether the [second](mention) is pet friendly?
+    - does the [2nd](mention) allow animals?
+    - does the [first](mention) result allow pets?
+    - any idea about animals in the [2nd](mention) place?
+    - do you know if the [second](mention) place is pet friendly?
 
 - intent: ask_good_for_children
   examples: |
@@ -111,6 +145,12 @@ nlu:
     - are there any restrictions on children in the [third](mention)?
     - are there any problems with children in the [fourth](mention)?
     - could you tell me whether the [fifth](mention) is good for children?
+    - are children allowed in the [last one](mention)?
+    - are children welcome in the [first one](mention)?
+    - is the [6th](mention) good for children?
+    - is the [first](mention) result good for kids?
+    - any info about children in the [2nd](mention) place?
+    - do you know whether the [second](mention) place is child friendly?
 
 - intent: ask_parking_options
   examples: |
@@ -122,6 +162,12 @@ nlu:
     - is there a parking lot?
     - can i park near the [first](mention) one?
     - where can I park my car near the [second](mention) one?
+    - is there a parking lot in the [third](mention)?
+    - could you tell me whether there is parking near the [fourth](mention)?
+    - is there any parking space in the [fifth](mention)?
+    - what are the parking options in the [2nd one](mention)?
+    - can I park near the [3rd](mention) result?
+    - does the [4th](mention) place offer parking to the customers?
 
 - intent: ask_payment_options
   examples: |
@@ -133,6 +179,13 @@ nlu:
     - can I pay with my phone?
     - can I use my debit card in the [first](mention)?
     - can I pay with my phone in the [second](mention)?
+    - could you tell me whether I can pay with credit card in the [third](mention)?
+    - list the payment options in the [fourth](mention)?
+    - what are the payment options in the [fifth](mention)?
+    - payment options in the [last one](mention)?
+    - can I pay with cash in the [1st](mention)?
+    - any info about the payment options of the [last two](mention) results?
+    - can I pay with credit card in the [2nd](mention) place?
 
 - intent: ask_outdoor_seating
   examples: |
@@ -144,9 +197,12 @@ nlu:
     - can I sit outside in the [first](mention)?
     - can I eat at outdoor table in the [first two](mention)?
     - could you tell me whether the [third](mention) has a terrace?
-    - is there a garden in the [fourth](mention)?
+    - is there a garden in the [fourth](mention) result?
     - can I sit outside in the [fifth](mention)?
     - could you tell me whether I can eat outside in the [last one](mention)?
+    - are there any outdoor tables in the [last one](mention)?
+    - is there a patio in the [2nd](mention)?
+    - does the [3rd](mention) place have a terrace?
 
 - intent: ask_reservable
   examples: |
@@ -158,18 +214,30 @@ nlu:
     - can I reserve a table in the [second](mention)?
     - could you tell me whether I can make a reservation in the [third](mention)?
     - is the [fourth](mention) reservable?
+    - could you tell me whether I can book a table in the [fifth](mention)?
+    - can I reserve a table in the [last one](mention)?
+    - tell me whether I can make a reservation in the [last one](mention)?
+    - can I make a reservation in the [1st](mention)?
+    - can i book a table in the [2nd](mention) place?
+    - does the [first](mention) result take reservations?
+    - do you know if the [last](mention) result accepts reservations?
 
 - intent: ask_restroom
   examples: |
     - are there restrooms?
-    - is there a toilet?
+    - is there a toilet in the [second](mention) place?
     - where is the bathroom?
-    - is there a restroom?
+    - is there a restroom in the [sixth](mention) result?
     - can I use the toilet?
     - is there a bathroom in the [first](mention)?
     - where is the restroom in the [second](mention)?
     - is there a toilet in the [third](mention)?
     - do [they](mention) have a bathroom?
+    - could you tell me whether the [fourth](mention) has a restroom?
+    - is there a toilet in the [fifth](mention)?
+    - can you tell me if i can use the bathroom in the [last one](mention)?
+    - tell me whether there is a restroom in the [last one](mention)?
+    - is there a bathroom in the [1st](mention)?
 
 - intent: ask_vegetarian
   examples: |
@@ -180,7 +248,13 @@ nlu:
     - do [they](mention) have vegan options?
     - can I eat vegetarian in the [first one](mention)?
     - is there a vegetarian dish in the [second](mention)?
-    - does the [third one](mention) have vegan options?
+    - does the [third](mention) result have vegan options?
+    - could you tell me whether the [fourth](mention) has vegetarian options?
+    - is there a vegetarian menu in the [fifth](mention)?
+    - can I eat vegetarian in the [last one](mention)?
+    - could you tell me whether it is possible to eat vegetarian in the [last one](mention)?
+    - tell me whether there is a vegetarian dish in the [last one](mention)?
+    - does the [2nd](mention) place have vegan options?
 
 - intent: ask_takeout
   examples: |
@@ -189,9 +263,39 @@ nlu:
     - can I order takeout?
     - can I take the food to go?
     - can I take the food away?
-    - can I order takeout in the [first](mention)?
+    - can I order takeout in the [first](mention) result?
     - can I take the food to go in the [second](mention)?
     - can I order takeout in the [third](mention)?
+    - could you tell me whether I can take the food away in the [fourth](mention)?
+    - could you tell me whether I can order takeout in the [fifth](mention)?
+    - could you tell me whether the [third](mention) has takeout?
+    - can I take the food to go in the [3rd](mention) place?
+
+- intent: ask_opening_hours
+  examples: |
+    - what are the opening hours?
+    - when is it open?
+    - when does it open?
+    - when does it close?
+    - what are the hours?
+    - when is the [first](mention) open?
+    - when does the [second](mention) close?
+    - what are the opening hours of the [third](mention)?
+    - is [it](mention) open on weekends?
+    - is [it](mention) open on Monday?
+    - when is the [first](mention) result open?
+    - when are [they](mention) open?
+    - when does the [first](mention) open and close?
+    - is the [second](mention) open [today at 8pm](datetime)?
+    - is the [third](mention) open on [Sunday](datetime)?
+    - what is the schedule of the [fourth](mention) [next week](datetime)?
+    - when does the [fifth](mention) close on [Friday](datetime)?
+    - could you tell me the opening hours of the [last one](mention)?
+    - can I go to the [last one](mention) on [Saturday](datetime) at 10am?
+    - tomorrow is [it](mention) open?
+    - tell me the opening hours of the [first](mention) and [second](mention) one?
+    - when does the [1st](mention) open?
+    - could you tell me whether the [second](mention) place is open [today](datetime)?
 
 - intent: ask_previous_info
   examples: |
@@ -202,3 +306,11 @@ nlu:
     - what about the [first two](mention)?
     - and the [second](mention)?
     - is there anything about the [third](mention)?
+    - could you also tell me about the [fourth](mention)?
+    - what about the [fifth](mention)?
+    - tell me the same about the [last one](mention)?
+    - and the [2nd](mention)?
+    - what about the [3rd](mention)?
+    - what about the [last](mention) result?
+    - what about the [second](mention) place?
+    - could you tell me the same for the [third](mention) result?

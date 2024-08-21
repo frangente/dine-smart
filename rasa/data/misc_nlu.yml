@@ -36,6 +36,23 @@ nlu:
     - haven't seen you for a while
     - hi, what's up
 
+- intent: ask_mood
+  examples: |
+    - how are you
+    - how are you doing
+    - how do you feel
+    - how are you today
+    - how are you feeling
+    - how is your day going
+    - how is your day
+    - could you tell me how you are
+    - how are you holding up
+    - how are you coping
+    - what are you up to
+    - how is it going
+    - how is everything
+    - how is your day so far
+
 - intent: goodbye
   examples: |
     - cu
@@ -48,6 +65,12 @@ nlu:
     - see you around
     - bye bye
     - see you later
+    - hope to see you soon
+    - hope i will never see you again
+    - i am leaving
+    - i am going
+    - i am off
+    - gotta go
 
 - intent: affirm
   examples: |
@@ -65,6 +88,12 @@ nlu:
     - yep
     - right
     - sounds good to me
+    - yes, definitely
+    - yes delete
+    - yes change
+    - yes modify
+    - yes proceed
+    - yes continue
 
 - intent: deny
   examples: |
@@ -123,6 +152,12 @@ nlu:
     - i will never tell you that
     - i don't want to share that
     - i don't want to tell you
+    - do not delete
+    - do not cancel
+    - do not modify
+    - do not change
+    - do not proceed
+    - do not continue
 
 - intent: bot_challenge
   examples: |
@@ -150,19 +185,6 @@ nlu:
     - who are you?
     - surely you are not a human
 
-- intent: help
-  examples: |
-    - help
-    - help me
-    - can you help me
-    - I need help
-    - can you help me with something
-    - i need your assistance
-    - can you assist me
-    - please help me
-    - i need some help
-    - i need your help
-
 - intent: inform_location
   examples: |
     - in [Milan](location)
@@ -181,6 +203,9 @@ nlu:
 
 - intent: inform_my_location
   examples: |
+    - i am in [Ravenna](location)
+    - i am in [Trento](location)
+    - [Trieste](location) is where I am
     - i am in [Milan](location)
     - i think i am in [Via Pescara Bari](location)
     - my gps says i am in [Via Cavour Trento](location)
@@ -238,6 +263,10 @@ nlu:
     - select
     - choose
     - pick
+    - show me the [first one](mention)
+    - show me the [next one](mention)
+    - show me the [next five](mention)
+    - make me see the [first](mention) and the [second](mention)
     - select the [first one](mention)
     - select the [first](mention) and the [second](mention)
     - pick the [last one](mention)
@@ -281,3 +310,24 @@ nlu:
     - what is the latest news?
     - what happened today?
     - show me the news
+
+- intent: order_food
+  examples: |
+    - i want to order food
+    - order some pizza
+    - order sushi
+    - order pizza
+    - make an order for pizza
+    - create an order for pizza
+    - i want to order a pizza
+    - i want to order a margherita pizza
+    - i want to order some spaghetti
+    - order fish and chips
+    - i want to order a burger
+    - make an order
+    - i want to order a salad
+    - i want to order a sandwich
+    - create an order
+    - can you order food for me
+    - can your order some pizza for me
+    - can you make an order for me

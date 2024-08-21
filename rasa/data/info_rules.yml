@@ -1,0 +1,38 @@
+version: "3.1"
+
+rules:
+
+- rule: show place details when the user asks for them
+  steps:
+  - or:
+    - intent: ask_address
+    - intent: ask_contact
+    - intent: ask_price_level
+    - intent: ask_rating
+    - intent: ask_website
+    - intent: ask_allows_animals
+    - intent: ask_good_for_children
+    - intent: ask_parking_options
+    - intent: ask_payment_options
+    - intent: ask_outdoor_seating
+    - intent: ask_reservable
+    - intent: ask_restroom
+    - intent: ask_vegetarian
+    - intent: ask_takeout
+    - intent: ask_opening_hours
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_retrieve_place_info
+
+- rule: show the same place details when the user asks for them again
+  steps:
+  - action: action_retrieve_place_info
+  - intent: ask_previous_info
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_retrieve_place_info

@@ -3,7 +3,8 @@
 
 from typing import Any
 
-import aiohttp
+import requests
+import torch
 from bs4 import BeautifulSoup
 from fake_headers import Headers
 from sentence_transformers import SentenceTransformer, util
@@ -12,8 +13,6 @@ from rasa.engine.graph import ExecutionContext, GraphComponent
 from rasa.engine.recipes.default_recipe import DefaultV1Recipe
 from rasa.engine.storage.resource import Resource
 from rasa.engine.storage.storage import ModelStorage
-
-# from rasa.nlu.constants import DENSE_FEATURIZABLE_ATTRIBUTES
 from rasa.nlu.extractors.extractor import EntityExtractorMixin
 from rasa.shared.nlu.constants import (
     ENTITIES,
@@ -22,6 +21,7 @@ from rasa.shared.nlu.constants import (
     METADATA,
 )
 from rasa.shared.nlu.training_data.message import Message
+from rasa.shared.nlu.training_data.training_data import TrainingData
 
 
 @DefaultV1Recipe.register(
@@ -51,6 +51,7 @@ class SemanticChecker(GraphComponent, EntityExtractorMixin):
         self._model = SentenceTransformer(model_name)
         if use_gpu:
             self._model = self._model.to("cuda")
+        self._model = self._model.eval()
 
         self._min_cosine_similarity = min_cosine_similarity
 
@@ -84,7 +85,7 @@ class SemanticChecker(GraphComponent, EntityExtractorMixin):
 
     @staticmethod
     def required_packages() -> list[str]:
-        return ["aiohttp", "fake_headers", "beautifulsoup4", "sentence_transformers"]
+        return ["requests", "fake_headers", "bs4", "sentence_transformers", "torch"]
 
     @staticmethod
     def supported_languages() -> list[str] | None:
@@ -101,12 +102,16 @@ class SemanticChecker(GraphComponent, EntityExtractorMixin):
             "entities": [],
         }
 
-    async def process(self, messages: list[Message]) -> list[Message]:
+    def process_training_data(self, training_data: TrainingData) -> TrainingData:
+        return training_data
+
+    def process(self, messages: list[Message]) -> list[Message]:
         for message in messages:
-            locale = message.get(METADATA).get("locale")
+            metadata = message.get(METADATA) or {}
+            locale = metadata.get("locale")
             country = _extract_country(locale) if locale else self._country
             entities = message.get(ENTITIES, []).copy()
-            await self._update_entities(entities, country)
+            self._update_entities(entities, country)
             message.set(ENTITIES, entities, add_to_output=True)
 
         return messages
@@ -115,7 +120,7 @@ class SemanticChecker(GraphComponent, EntityExtractorMixin):
     # Private Methods
     # ----------------------------------------------------------------------- #
 
-    async def _update_entities(
+    def _update_entities(
         self,
         entities: list[dict[str, Any]],
         country: str | None,
@@ -123,17 +128,16 @@ class SemanticChecker(GraphComponent, EntityExtractorMixin):
         for entity in entities:
             if entity[ENTITY_ATTRIBUTE_TYPE] in self._entities:
                 template = self._entities[entity[ENTITY_ATTRIBUTE_TYPE]]
-                definitions = await _get_definitions(
-                    entity[ENTITY_ATTRIBUTE_VALUE], country
-                )
+                definitions = _get_definitions(entity[ENTITY_ATTRIBUTE_VALUE], country)
 
                 entity["template"] = template
                 entity["definitions"] = definitions
-                entity["is_correct"] = await self._check_meaning(template, definitions)
+                entity["is_correct"] = self._check_meaning(template, definitions)
 
                 self.add_processor_name(entity)
 
-    async def _check_meaning(self, template: str, definitions: list[str]) -> bool:
+    @torch.no_grad()  # type: ignore
+    def _check_meaning(self, template: str, definitions: list[str]) -> bool:
         if len(definitions) == 0:
             return False
 
@@ -147,7 +151,7 @@ class SemanticChecker(GraphComponent, EntityExtractorMixin):
 # --------------------------------------------------------------------------- #
 
 
-async def _get_definitions(word: str, country: str | None) -> list[str]:
+def _get_definitions(word: str, country: str | None) -> list[str]:
     """Gets the definitions of a word from the Cambridge Dictionary.
 
     Args:
@@ -165,16 +169,15 @@ async def _get_definitions(word: str, country: str | None) -> list[str]:
         url = f"https://dictionary.cambridge.org/dictionary/english/{word}"
     headers = Headers(headers=True).generate()
 
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, headers=headers, allow_redirects=False) as response:
-            response.raise_for_status()
-            if response.status != 200:
-                # the word is not in the dictionary
-                return []
+    response = requests.get(url, headers=headers, allow_redirects=False, timeout=10)
+    response.raise_for_status()
+    if response.status_code != 200:
+        # the word is not in the dictionary
+        return []
 
-            html = BeautifulSoup(await response.text(), "html.parser")
-            divs = html.select(".def.ddef_d.db")
-            return [div.get_text().strip(":\n ").replace("\n", " ") for div in divs]
+    html = BeautifulSoup(response.text, "html.parser")
+    divs = html.select(".def.ddef_d.db")
+    return [div.get_text().strip(":\n ").replace("\n", " ") for div in divs]
 
 
 _LOCALES = ["en-GB", "en-US"]

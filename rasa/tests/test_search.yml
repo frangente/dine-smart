@@ -1,0 +1,395 @@
+version: "3.1"
+
+stories:
+- story: the user sees their search history and deletes a search
+  steps:
+  - user: hello
+    intent: greet
+  - action: action_greet
+  - user: show me my search history
+    intent: show_searches
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_show_selected_searches
+  - user: select the first one
+    intent: select
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_show_selected_searches
+  - user: show me the search parameters
+    intent: show_search_parameters
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_show_search_parameters
+  - user: delete this search
+    intent: delete_searches
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_confirm_delete_selected_searches
+  - user: yes
+    intent: affirm
+  - action: action_delete_selected_searches
+  - action: utter_ask_further_help
+
+- story: the user has no search history but they do not want to start a new search
+  steps:
+  - user: hello i am [Francesco](user_name)
+    intent: greet
+  - action: action_greet
+  - user: show me my search history
+    intent: show_searches
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: no_searches
+  - action: utter_no_searches
+  - action: utter_ask_start_search
+  - user: no
+    intent: deny
+  - action: utter_ask_further_help
+  - user: no
+    intent: deny
+  - action: utter_goodbye_no_help
+  - action: action_session_start
+
+- story: the user has no search history so they start a new one
+  steps:
+  - user: hello
+    intent: greet
+  - action: action_greet
+  - user: show me [all](mention) my searches
+    intent: show_searches
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: no_searches
+  - action: utter_no_searches
+  - action: utter_ask_start_search
+  - user: i want to search for a [restaurant](place_type)
+    intent: search_place
+  - action: action_start_search
+  - action: search_form
+  - active_loop: search_form
+  - user: it should be near [Milan](location)
+    intent: inform_search
+  - action: search_form
+  - active_loop: null
+  - action: action_create_search
+  - action: action_search
+  - user: show me the [first](mention) result
+    intent: show_results
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_show_selected_results
+
+- story: the user selects a search from the history and modifies it
+  steps:
+  - user: hi there
+    intent: greet
+  - action: action_greet
+  - user: show me my search history
+    intent: show_searches
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_show_selected_searches
+  - user: select the [second one](mention)
+    intent: select
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_show_selected_searches
+  - user: show me the search parameters
+    intent: show_search_parameters
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_show_search_parameters
+  - user: it should actually be a [bar](place_type)
+    intent: inform_search
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_start_search
+  - action: search_form
+  - active_loop: search_form
+  - active_loop: null
+  - action: action_create_search
+  - action: action_search
+  - user: what is the address of the [first](mention) result
+    intent: ask_address
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_retrieve_place_info
+  - user: what about the [second one](mention)
+    intent: ask_previous_info
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_retrieve_place_info
+
+- story: the user specifies the wrong search indices
+  steps:
+  - user: hi
+    intent: greet
+  - action: action_greet
+  - user: show me my searches
+    intent: show_searches
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_show_selected_searches
+  - user: select the [third](mention) search
+    intent: select_searches
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: invalid_selection
+  - action: utter_ask_which_searches_to_select_2
+  - user: the [first two](mention)
+    intent: select_searches
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_show_selected_searches
+  - user: show me the search parameters
+    intent: show_search_parameters
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: multiple
+  - action: utter_multiple_searches_selected
+  - action: utter_ask_which_search_to_select
+  - user: the [second](mention)
+    intent: select
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_show_search_parameters
+
+- story: the user selects one search and asks info about the results
+  steps:
+  - user: hi
+    intent: greet
+  - action: action_greet
+  - user: show me my [first](mention) search
+    intent: show_searches
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_show_selected_searches
+  - user: what are the opening hours of the [first](mention) place
+    intent: ask_opening_hours
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_retrieve_place_info
+  - user: what is the address
+    intent: ask_address
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_retrieve_place_info
+  - user: book [it](mention) for tomorrow at 8 pm
+    intent: book_result
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_count_selected_results
+  - slot_was_set:
+    - selected_results_count: one
+  - action: action_check_is_reservable
+  - slot_was_set:
+    - is_reservable: true
+  - action: action_start_booking
+  - action: booking_form
+  - active_loop: booking_form
+  - user: it if for [4](people_count) people under the name [Francesco](user_name)
+    intent: inform_booking
+  - action: booking_form
+  - active_loop: null
+  - action: action_confirm_booking
+  - user: yes
+    intent: affirm
+  - action: action_create_booking
+
+- story: the user selects a booking from their history and tries to modify it
+  steps:
+  - user: hi
+    intent: greet
+  - action: action_greet
+  - user: show me my booking history
+    intent: show_bookings
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_show_selected_bookings
+  - user: select the [first one](mention)
+    intent: select
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_show_selected_bookings
+  - user: show me the booking details
+    intent: show_booking_details
+  - action: action_count_selected_bookings
+  - slot_was_set:
+    - selected_bookings_count: one
+  - action: action_show_booking_details
+  - user: change the reservation to [3](people_count) people
+    intent: inform_booking
+  - action: action_count_selected_bookings
+  - slot_was_set:
+    - selected_bookings_count: one
+  - action: action_check_future_booking
+  - slot_was_set:
+    - is_future_booking: false
+  - action: utter_cannot_modify_past_booking
+
+- story: the user selects a booking from their history and modifies it
+  steps:
+  - user: hi
+    intent: greet
+  - action: action_greet
+  - user: show my bookings for tomorrow
+    intent: show_bookings
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_show_selected_bookings
+  - user: select the [first one](mention)
+    intent: select
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_show_selected_bookings
+  - user: the reservation should be for [two](people_count) people
+    intent: inform_booking
+  - action: action_count_selected_bookings
+  - slot_was_set:
+    - selected_bookings_count: one
+  - action: action_check_future_booking
+  - slot_was_set:
+    - is_future_booking: true
+  - action: action_start_booking
+  - action: booking_form
+  - active_loop: booking_form
+  - active_loop: null
+  - action: action_confirm_booking
+  - user: no
+    intent: deny
+  - action: action_cancel_booking
+
+- story: the user checks their booking history and deletes it
+  steps:
+  - user: hi
+    intent: greet
+  - action: action_greet
+  - user: show me my booking history
+    intent: show_bookings
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_show_selected_bookings
+  - user: delete [them all](mention)
+    intent: delete_bookings
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_confirm_delete_selected_bookings
+  - user: yes
+    intent: affirm
+  - action: action_delete_selected_bookings
+  - action: utter_ask_further_help
+  - user: show me the bookings for tomorrow
+    intent: show_bookings
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: no_bookings
+  - action: utter_no_bookings
+  - user: goodbye
+    intent: goodbye
+  - action: utter_goodbye
+  - action: action_session_start
+
+- story: the user see the results of a search and books one of them
+  steps:
+  - user: hi
+    intent: greet
+  - action: action_greet
+  - user: show me my [last](mention) search
+    intent: show_searches
+  - action: action_set_selected_searches
+  - slot_was_set:
+    - selected_searches_error: null
+  - action: action_show_selected_searches
+  - user: show me the [first](mention) result
+    intent: show_results
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_show_selected_results
+  - user: book [it](mention) for tomorrow at 8 pm
+    intent: book_result
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_count_selected_results
+  - slot_was_set:
+    - selected_results_count: one
+  - action: action_check_is_reservable
+  - slot_was_set:
+    - is_reservable: true
+  - action: action_start_booking
+  - action: booking_form
+  - active_loop: booking_form
+  - user: it is for [2](people_count)
+    intent: inform_booking
+  - action: booking_form
+  - active_loop: booking_form
+  - user: it should be under the name of [Francesco](user_name)
+    intent: inform_booking
+  - action: booking_form
+  - active_loop: null
+  - action: action_confirm_booking
+  - user: yes
+    intent: affirm
+  - action: action_create_booking
+  - user: show me the bookings for tomorrow
+    intent: show_bookings
+  - action: action_set_selected_bookings
+  - slot_was_set:
+    - selected_bookings_error: null
+  - action: action_show_selected_bookings
+  - user: goodbye
+    intent: goodbye
+  - action: utter_goodbye
+  - action: action_session_start
+
+    

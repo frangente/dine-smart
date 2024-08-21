@@ -1,0 +1,79 @@
+version: "3.1"
+
+nlu:
+
+- intent: book_result
+  examples: |
+    - book [it](mention)
+    - book the [first one](mention)
+    - book the [last one](mention)
+    - book [it](mention) for [4](people_count) people for [tomorrow](datetime)
+    - book [it](mention) for [2](people_count) for [this evening](datetime)
+    - book the [second](mention)
+    - make a reservation for the [second one](mention) [tomorrow night](datetime)
+    - book a table for [2](people_count) people for [tomorrow](datetime)
+    - could you make a reservation for the [first one](mention) for [2](people_count) people for [next Friday](datetime)
+    - reserve the [last one](mention) for [4](people_count) people for [tomorrow](datetime)
+    - would you book the [first one](mention) for [2](people_count) people for [this evening](datetime)
+    - could you book the [second](mention) for [tomorrow](datetime)
+    - book the [second one](mention) for [tomorrow at 8 pm](datetime)
+    - book [it](mention) for [2](people_count) for [the day after tomorrow at 7pm](datetime) under the name of [Maria](user_name)
+    - book the [first one](mention) for [2](people_count) for [the day after tomorrow at 2pm](datetime)
+
+- intent: inform_booking
+  examples: |
+    - we are [4](people_count) people
+    - we are in total [2](people_count)
+    - it is for [2](people_count) people
+    - the reservation is for [4](people_count) people
+    - the reservation should be for [2](people_count)
+    - it should be for [next Friday at 1pm](datetime)
+    - make the reservation for [one](people_count) person
+    - i want to book an outside table for [three](people_count)
+    - the booking is for [two](people_count)
+    - the booking is for [1](people_count)
+    - change the reservation to [3](people_count) people
+    - change the reservation to [2](people_count)
+    - change it to [tomorrow](datetime)
+    - change it to [next Friday at 6 pm](datetime)
+    - change it to [one](people_count) person
+    - i want to change the reservation to an outside table for [three](people_count)
+    - the booking is for [two](people_count)
+    - [4](people_count) people
+    - [tomorrow at 7pm](datetime)
+    - [next Monday at 8pm](datetime)
+    - [next Friday at lunch](datetime)
+    - the reservation is for [2](people_count)
+    - the reservation should be made for [4](people_count) people
+    - [the 27th of this month at 12 am](datetime)
+    - [the 27th of August at 20:00](datetime)
+    - make it for [next Tuesday](datetime)
+    - it should be under the name of [John](user_name)
+    - you should book it under the name of [Anna](user_name)
+    - make the reservation for [tomorrow at 10am](datetime) and to the name of [Riccardo](user_name)
+    - actually we are [2](people_count) people
+    - it should be under the name [Francesco](user_name)
+    - make it under the name [Anna](user_name)
+    - the reservation should be under the name [Matteo](user_name)
+    - change the date to [next Monday at 14:30](datetime)
+    - the new date is [next Friday at 21](datetime)
+    - for some problems I need to change the reservation to [3](people_count) people
+    - I need to change the reservation to [tomorrow at 6 pm](datetime)
+
+- intent: show_booking_details
+  examples: |
+    - what are the details of the booking?
+    - show me the details of the booking
+    - what are the details of the reservation?
+    - could you tell me the details of the booking?
+    - can you show me the details of the reservation?
+    - details of the booking
+    - details of the reservation
+    - list the details of the booking
+    - describe the details of the reservation
+    - could you tell me the details of the reservation?
+    - could you show me the details of the booking?
+    - show me the details of the reservation
+    - any idea about the details of the booking?
+    - list me the details of the reservation
+    - specifics of the booking

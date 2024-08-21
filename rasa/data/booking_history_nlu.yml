@@ -1,0 +1,76 @@
+version: "3.1"
+
+nlu:
+- intent: show_bookings
+  examples: |
+    - show me the booking history
+    - booking history
+    - show me my booking activity
+    - booking activity please
+    - show me my history of bookings
+    - could you show me the reservation history?
+    - what is my booking history?
+    - what bookings have I done?
+    - what are my bookings?
+    - may I see my booking activity?
+    - list [all](mention) the reservations that I have done
+    - show me the [first](mention) and [third](mention) bookings
+    - show me the [last three](mention) bookings
+    - show me the [first](mention), [third](mention) and [fifth](mention) booking
+    - show me all the bookings of [today](datetime)
+    - list the bookings for [tomorrow](datetime)
+    - show me the bookings for the [next week](datetime)
+    - show me the bookings of [next month](datetime)
+    - show me the bookings for the [next year](datetime)
+    - may I see the bookings of the [past week](datetime)
+    - show me the [1st](mention) booking
+    - let me see the [2nd](mention) booking
+    - show me the [1st two](mention) bookings
+
+- intent: select_bookings
+  examples: |
+    - select the [first](mention) booking
+    - choose the [second](mention) booking
+    - select booking number [3](mention)
+    - select [all](mention) bookings
+    - go to the [fourth](mention) booking
+    - go to booking [5](mention)
+    - pick the [last](mention) reservation
+    - [first](mention) booking
+    - move to the [next](mention) booking
+    - move to the [previous](mention) reservation
+    - load the [next](mention) booking
+    - start the [previous](mention) booking
+    - select the [last](mention) booking
+    - select the [first](mention), [second](mention) and [third](mention) booking
+    - select the bookings of [today](datetime)
+    - select the bookings for [tomorrow](datetime)
+    - move to the bookings for the [next week](datetime)
+    - pick the bookings of the [last month](datetime)
+    - select the [1st](mention) booking
+    - select the [2nd](mention) booking
+    - select the [3rd](mention) booking
+    - pick the [4th](mention) booking
+
+- intent: delete_bookings
+  examples: |
+    - delete booking
+    - wipe out my booking history
+    - clear booking activity
+    - clear booking history
+    - delete [this](mention) booking
+    - remove [current](mention) booking
+    - delete the current booking
+    - remove the [first](mention) booking
+    - delete the [last](mention) reservation
+    - cancel the [second](mention) booking
+    - wipe out the [third](mention) booking
+    - delete [those](mention) bookings
+    - delete [selected](mention) booking
+    - wipe out [all](mention) reservation
+    - delete the [second](mention) and [third](mention) booking
+    - delete the bookings of [today](datetime)
+    - delete the bookings for [tomorrow](datetime)
+    - delete the bookings of [yesterday](datetime)
+    - delete the bookings of the [past week](datetime)
+    - delete the [1st](mention) booking

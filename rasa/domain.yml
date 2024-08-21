@@ -9,25 +9,29 @@ version: "3.1"
 
 intents:
 - greet
+- ask_mood
 - goodbye
 - affirm
 - deny
 - continue
 - stop
 - bot_challenge
-- help
 - inform_location
 - inform_my_location
 - delete
 - select
 - out_of_scope
+- order_food
 
-- show_search_history
-- clear_search_history
-- select_searches
+- help
+
+- show_searches
 - delete_searches
-- show_search_parameters
-- show_search_results
+- select_searches
+
+- show_results
+- delete_results
+- select_results
 
 - search_place_to_eat_now
 - search_place_to_drink_now
@@ -56,6 +60,7 @@ intents:
 - rank_results_by_relevance
 - rank_results_by_distance
 - rank_results_by_unsupported
+- show_search_parameters
 
 - ask_address
 - ask_contact
@@ -71,7 +76,16 @@ intents:
 - ask_restroom
 - ask_vegetarian
 - ask_takeout
+- ask_opening_hours
 - ask_previous_info
+
+- show_bookings
+- select_bookings
+- delete_bookings
+
+- book_result
+- inform_booking
+- show_booking_details
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 # ENTITIES
@@ -85,6 +99,8 @@ entities:
 - place_type
 - cuisine_type
 - meal_type
+- people_count
+- datetime
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 # SLOTS
@@ -114,6 +130,7 @@ slots:
     mappings:
     - type: from_entity
       entity: user_name
+      intent: greet
   
   user_location:
     type: any
@@ -127,22 +144,34 @@ slots:
 
   search_history:
     type: list
-    influence_conversation: true
+    influence_conversation: false
     initial_value: []
     mappings:
     - type: custom
   
   selected_searches:
-    type: addons.slots.EmptySingleMultipleList
+    type: list
+    influence_conversation: false
+    mappings:
+    - type: custom
+
+  selected_searches_count:
+    type: categorical
+    values:
+    - zero
+    - one
+    - multiple
     influence_conversation: true
     mappings:
     - type: custom
-  
+
   selected_searches_error:
     type: categorical
     values:
-    - not_specified
-    - wrong_indices
+    - no_searches
+    - no_selection
+    - invalid_selection
+    - no_searches_found
     influence_conversation: true
     mappings:
     - type: custom
@@ -151,38 +180,114 @@ slots:
   # SEARCH SLOTS
   # ------------------------------------------------------------------------- #
 
-  all_required_parameters_set:
-    type: bool
-    influence_conversation: true
-    mappings:
-    - type: custom
-
-  search_key:
+  search_place_type:
     type: text
     influence_conversation: false
     mappings:
     - type: custom
-      action: action_set_search_key
+      action: action_set_search_place_type
       conditions:
       - active_loop: search_form
 
-  invalid_location:
-    type: text
+  search_place_type_error:
+    type: bool
     influence_conversation: false
     mappings:
     - type: custom
 
-  invalid_location_reasons:
+  search_location:
+    type: any
+    influence_conversation: false
+    mappings:
+    - type: custom
+      action: action_set_search_location
+      conditions:
+      - active_loop: search_form
+
+  search_location_error:
     type: list
     influence_conversation: false
     mappings:
     - type: custom
 
-  invalid_place_type:
+  search_open_now:
     type: bool
     influence_conversation: false
     mappings:
     - type: custom
+      action: action_set_search_open_now
+      conditions:
+      - active_loop: search_form
+
+  search_activity:
+    type: categorical
+    values:
+    - eat
+    - drink
+    influence_conversation: false
+    mappings:
+    - type: custom
+      action: action_set_search_activity
+      conditions:
+      - active_loop: search_form
+
+  search_price_range:
+    type: categorical
+    values:
+    - any
+    - inexpensive
+    - moderate
+    - expensive
+    influence_conversation: false
+    mappings:
+    - type: custom
+      action: action_set_search_price_range
+      conditions:
+      - active_loop: search_form
+
+  search_quality:
+    type: categorical
+    values:
+    - any
+    - moderate
+    - excellent
+    influence_conversation: false
+    mappings:
+    - type: custom
+      action: action_set_search_quality
+      conditions:
+      - active_loop: search_form
+
+  search_cuisine_type:
+    type: text
+    influence_conversation: false
+    mappings:
+    - type: from_entity
+      entity: cuisine_type
+      conditions:
+      - active_loop: search_form
+
+  search_place_name:
+    type: text
+    influence_conversation: false
+    mappings:
+    - type: from_entity
+      entity: place_name
+      conditions:
+      - active_loop: search_form
+
+  search_meal_type:
+    type: text
+    influence_conversation: false
+    mappings:
+    - type: from_entity
+      entity: meal_type
+      conditions:
+      - active_loop: search_form
+
+  # ------------------------------------------------------------------------- #
+  # SEARCH RESULTS SLOTS
+  # ------------------------------------------------------------------------- #
 
   selected_results:
     type: list
@@ -190,11 +295,23 @@ slots:
     mappings:
     - type: custom
 
+  selected_results_count:
+    type: categorical
+    values:
+    - zero
+    - one
+    - multiple
+    influence_conversation: true
+    mappings:
+    - type: custom
+
   selected_results_error:
     type: categorical
     values:
-    - wrong_indices
     - no_results
+    - no_selection
+    - invalid_selection
+    - no_results_found
     influence_conversation: true
     mappings:
     - type: custom
@@ -205,12 +322,110 @@ slots:
 
   booking_history:
     type: list
-    influence_conversation: true
+    influence_conversation: false
+    initial_value: []
     mappings:
     - type: custom
   
-  selected_booking:
-    type: float
+  selected_bookings:
+    type: list
+    influence_conversation: false
+    mappings:
+    - type: custom
+
+  selected_bookings_count:
+    type: categorical
+    values:
+    - zero
+    - one
+    - multiple
+    influence_conversation: true
+    mappings:
+    - type: custom
+
+  selected_bookings_error:
+    type: categorical
+    values:
+    - no_bookings
+    - no_selection
+    - invalid_selection
+    - no_bookings_found
+    influence_conversation: true
+    mappings:
+    - type: custom
+
+  # ------------------------------------------------------------------------- #
+  # BOOKING SLOTS
+  # ------------------------------------------------------------------------- #
+
+  booking_place:
+    type: any
+    influence_conversation: false
+    mappings:
+    - type: custom
+
+  booking_datetime:
+    type: any
+    influence_conversation: false
+    mappings:
+    - type: custom
+      action: action_set_booking_datetime
+      conditions:
+      - active_loop: booking_form
+  
+  booking_datetime_error:
+    type: categorical
+    values:
+    - coarse
+    - past
+    - far
+    - closed
+    influence_conversation: false
+    mappings:
+    - type: custom
+
+  booking_people_count:
+    type: any
+    influence_conversation: false
+    mappings:
+    - type: custom
+      action: action_set_booking_people_count
+      conditions:
+      - active_loop: booking_form
+
+  booking_people_count_error:
+    type: categorical
+    values:
+    - small
+    - large
+    influence_conversation: false
+    mappings:
+    - type: custom
+  
+  booking_author:
+    type: text
+    influence_conversation: false
+    mappings:
+    - type: custom
+      action: action_set_booking_author
+      conditions:
+      - active_loop: booking_form
+
+  is_reservable:
+    type: bool
+    influence_conversation: true
+    mappings:
+    - type: custom
+
+  is_future_booking:
+    type: bool
+    influence_conversation: true
+    mappings:
+    - type: custom
+
+  suggest_booking:
+    type: bool
+    initial_value: false
     influence_conversation: false
     mappings:
     - type: custom
@@ -222,7 +437,22 @@ slots:
 forms:
   search_form:
     required_slots:
-    - search_key
+    - search_open_now
+    - search_activity
+    - search_price_range
+    - search_quality
+    - search_cuisine_type
+    - search_place_name
+    - search_meal_type
+    - search_place_type
+    - search_location
+
+  booking_form:
+    required_slots:
+    - booking_datetime
+    - booking_people_count
+    - booking_author
+    
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 # ACTIONS
@@ -234,28 +464,55 @@ actions:
 - action_session_start
 - action_restart
 
-- action_search_history_guard
-- action_selected_searches_guard
+- action_set_selected_searches
+- action_show_selected_searches
+- action_delete_selected_searches
+- action_confirm_delete_selected_searches
+- action_count_selected_searches
 
-- action_set_search_key
-- action_ask_search_key
-- action_check_search_parameters
-- action_show_search_parameters
+- validate_search_form
+- action_set_search_place_type
+- action_set_search_location
+- action_set_search_open_now
+- action_set_search_activity
+- action_set_search_price_range
+- action_set_search_quality
+- action_ask_search_place_type
+- action_ask_search_location
+- action_start_search
+- action_create_search
+- action_cancel_search
 - action_search
-- action_rank_results
+- action_change_search_rank_by
+- action_show_search_parameters
+
 - action_set_selected_results
 - action_show_selected_results
-
-- action_show_search_history
-- action_clear_search_history
-- action_start_search
-- action_show_selected_searches
-- action_ask_search_deletion
-- action_delete_searches
-- action_set_selected_searches
+- action_count_selected_results
 
 - action_retrieve_place_info
 
+- action_set_selected_bookings
+- action_show_selected_bookings
+- action_delete_selected_bookings
+- action_confirm_delete_selected_bookings
+- action_count_selected_bookings
+
+- action_set_booking_datetime
+- action_set_booking_people_count
+- action_set_booking_author
+- action_ask_booking_datetime
+- action_ask_booking_people_count
+- action_ask_booking_author
+- action_start_booking
+- action_confirm_booking
+- action_create_booking
+- action_cancel_booking
+- action_show_booking_details
+- action_check_is_reservable
+- action_state_not_reservable
+- action_check_future_booking
+- action_suggest_booking
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 # RESPONSES
@@ -277,6 +534,11 @@ responses:
       Sorry, but I can only help you with finding places to eat or drink and making bookings. 
       Still, to help you with that, I have forwarded your request to Google Gemini. 
       Here is the response I got: {content}.
+
+  utter_cannot_order_food:
+  - text: |
+      Sorry, but I cannot order food or drinks for you, but I can help you find places that serve them.
+      Just start a search and I will assist you.
 
   utter_ask_rephrase:
   - text: "I'm sorry, I didn't understand that. Could you please rephrase it?"
@@ -309,18 +571,89 @@ responses:
   - text: "How can I assist you?"
 
   utter_ask_further_help:
-  - text: "Okay, is there anything else I can help you with?"
-  - text: "Can I at least help you with anything else?"
-  - text: "Perhaps, do you need help with anything else?"
-  - text: "Well, is there anything else I can assist you with?"
+  - text: "Is there anything else I can help you with?"
+  - text: "Can I help you with anything else?"
+  - text: "Do you need help with anything else?"
+  - text: "Is there anything else I can assist you with?"
+
+  utter_ask_further_help_2:
+  - text: "Can I help you in any other way?"
+  - text: "Is there at least something else I can help you with?"
+  - text: "Perhaps I can help you with something else?"
+
+  utter_help/general:
+  - text: "Sure, how can I help you?"
+  - text: "What can I do for you?"
+  - text: "How can I assist you?"
+
+  utter_help/capabilities:
+  - text: |
+      I have a wide range of capabilities:
+      - i can help you find places to eat or drink
+      - i can manage your search history
+      - i can provide information about places
+      - i can help you make bookings
+      - i can manage your booking history
+
+  utter_help/search:
+  - text: "Just say 'start a new search' and I will guide you through the process."
+  - text: "You can start a new search by saying 'start a new search'. I will help you with the rest."
+
+  utter_help/search_parameters:
+  - text: |
+      For each search, you can specify the following parameters:
+      - the location where you want to search
+      - the type of place you are looking for, e.g. restaurants, bars, pubs
+      - the type of cuisine you are interested in
+      - the price range you are looking for
+      - the quality level you are looking for
+      - whether you want to go for breakfast, lunch, or dinner
+  
+  utter_help/info:
+  - text: |
+      I can provide you with information about places such as:
+      - the address
+      - the contact information
+      - the price level
+      - the rating
+      - the website
+      - whether it allows animals
+      - whether it is good for children
+      - the parking options
+      - the payment options
+      - whether it has outdoor seating
+      - whether it is reservable
+      - the restroom availability
+      - whether it has vegetarian options
+      - whether it offers takeout
+      - the opening hours
+
+  utter_help/booking:
+  - text: |
+      Just select a result from one of tour search and say 'book this place'. 
+      I will guide you through the booking process.
+  - text: |
+      You can book a place by selecting a result from your search and saying 'book this place'. 
+      I will help you with the rest.
+
+  utter_help/booking_parameters:
+  - text: |
+      For each booking, you can specify the following parameters:
+      - the date and time of the booking
+      - the number of people
+      - your name as the author of the booking
 
   # ------------------------------------------------------------------------- #
   # GREETINGS AND FAREWELLS
   # ------------------------------------------------------------------------- #
 
   utter_first_greet:
-  - text: "Hi {user_name}! This is Dine-Smart, your personal assistant to assist you in all your dining needs. How can I help you today?"
-  - text: "Hello {user_name}! Welcome to Dine-Smart, your personal assistant for all your dining needs. What can I do for you today?"
+  - text: |
+      Hi {user_name}! This is Dine-Smart, your personal assistant to assist you in all your dining needs. 
+      How can I help you today?
+  - text: |
+      Hello {user_name}! Welcome to Dine-Smart, your personal assistant for all your dining needs. 
+      What can I do for you today?
 
   utter_greet:
   - text: "Hi {user_name}! How can I help you today?"
@@ -340,36 +673,24 @@ responses:
   utter_introduction:
   - text: "I am Dine-Smart, your digital assistant here to help you with all your dining needs."
 
+  utter_mood:
+  - text: "I am just a bot, so I don't have feelings. But my creators are always happy to see me helping you."
+  - text: "I am just a bot, so I don't have feelings. But I am always happy to help you."
+  - text: "I am just a bot, so I don't have feelings. But I am always here to help you."
+
   # ------------------------------------------------------------------------- #
   # SEARCH HISTORY
   # ------------------------------------------------------------------------- #
 
-  utter_empty_search_history_show:
+  utter_no_searches:
   - text: "Sorry, but you haven't done any searches yet."
   - text: "I am sorry, but you haven't searched for anything yet."
   - text: "Sorry but you don't have any searches yet."
   - text: "I am sorry, but your search history is empty."
 
-  utter_empty_search_history_delete:
-  - text: "I am sorry, but you don't have any searches to delete."
-  - text: "Your search history is empty so there is nothing to delete."
-  - text: "Sorry, but I couldn't find any searches to delete."
-
-  utter_confirm_clear_search_history:
-  - text: "Are you sure you want to clear your search history? This action cannot be undone."
-  - text: "Are you sure you want to delete all your searches? You won't be able to recover them."
-  - text: "Are you sure you want to remove all your searches? This action is irreversible."
-
-  utter_cancel_clear_search_history:
-  - text: "Okay, I won't delete your searches."
-  - text: "Okay, your searches are safe."
-  - text: "Okay, no searches will be deleted."
-
-  utter_cleared_search_history:
-  - text: "Your search history has been successfully cleared."
-  - text: "All your searches have been deleted."
-  - text: "Okay, I have removed all your searches."
-  - text: "Okay, your search activity is now empty."
+  utter_no_searches_found:
+  - text: "Sorry, but I couldn't find any searches with the specified criteria."
+  - text: "Sorry, but I didn't find any searches with the specified criteria."
 
   utter_ask_which_search_to_select:
   - text: "Which search would you like to select?"
@@ -399,14 +720,27 @@ responses:
   - text: "As you command, the selected searches have been deleted."
   - text: "It's done! The selected searches have been deleted."
 
-  utter_cancel_search_deletion:
-  - text: "Okay, I won't delete the selected searches."
-  - text: "Okay, the selected searches are safe."
-  - text: "Okay, no searches will be deleted."
+  utter_cancel_delete_selected_searches:
+  - text: "Okay, no searches have been deleted."
+  - text: "Okay, the searches will remain in your history."
+  - text: "Okay, the searches have not been deleted."
+
+  utter_cancel_modify_search:
+  - text: "Okay, no changes have been made to the search."
+  - text: "Okay, the search will remain unchanged."
+  - text: "Okay, the search has not been modified."
+
+  utter_cancel_search:
+  - text: "Okay, I interrupted the search. It will not be saved in your history."
+  - text: "Okay, I stopped the search. It will not be saved in your history."
 
   # ------------------------------------------------------------------------- #
   # SEARCH
   # ------------------------------------------------------------------------- #
+
+  utter_not_reservable:
+  - text: "Sorry, but {place_name} does not accept reservations."
+  - text: "Sorry, but {place_name} does not allow reservations."
 
   utter_ask_start_search:
   - text: "Would you like to start a new search?"
@@ -414,16 +748,16 @@ responses:
   - text: "Shall we start a new search?"
 
   utter_no_search_selected:
-  - text: "Sorry there is no active search. Please select one or start a new search before proceeding."
-  - text: "I can't proceed without knowing which search you are referring to. Please select one from your activity."
+  - text: "Sorry but you haven't selected any search."
+  - text: "I can't proceed without knowing which search you are referring to."
 
   utter_multiple_searches_selected:
-  - text: "Sorry, but you have multiple selected searches so I can't proceed. Please select one to continue."
+  - text: "Sorry, but you have multiple selected searches so I can't proceed."
   - text: "I don't know which search you are referring to. Please select one from your activity."
 
-  utter_started_search:
+  utter_start_search:
   - text: "Okay, starting a new search."
-  - text: "Okay, I will start a new search."
+  - text: "Okay, I will start a new search to help you find some places."
 
   # place_type
   utter_ask_place_type:
@@ -440,11 +774,6 @@ responses:
   - text: "Could you tell me your current location so that I can find nearby {place_type}?"
   - text: "Okay, could you tell me where you are so that I can find nearby {place_type}?"
 
-  utter_ask_user_location_2:
-  - text: "Sorry, but I need to know your location to proceed."
-  - text: "Sorry to insist, but I need to know your location to proceed."
-  - text: "I can't proceed without knowing your location. Could you tell me where you are?"
-
   utter_need_user_location:
   - text: "Sorry, but I don't know your location. Could you tell me where you are?"
   - text: "I need to know your location to find places nearby. Could you tell me where you are?"
@@ -454,11 +783,6 @@ responses:
   - text: "Where would you like to search for {place_type}?"
   - text: "Where should I look for {place_type}?"
   - text: "Where do you want me to search for {place_type}?" 
-
-  utter_ask_location_2:
-  - text: "Sorry to insist, but I need to know the search location to proceed."
-  - text: "I can't proceed without knowing the search location. Could you tell me where you want to search?"
-  - text: "I don't want to be annoying, but I need to know the search location to proceed."
 
   utter_ask_location_place_name:
   - text: "Where is the {place_name} located?"
@@ -477,11 +801,6 @@ responses:
   utter_ambiguous_location:
   - text: "Sorry, but I found multiple results for {location}. Could you be more specific?"
   - text: "Sorry, but I wasn't able to precisely locate {location}. Could you provide more details?"
-
-  utter_inform_how_stop_search:
-  - text: "If you don't want to keep searching, just say 'stop'."
-  - text: "If you want to stop searching, just say 'stop'."
-  - text: "If you no longer intend to search, just say 'stop'."
 
   # rank
   utter_changed_rank_by:
@@ -503,31 +822,208 @@ responses:
   - text: "Do you really want to stop the search?"
   - text: "Are you sure you want to end the search?"
 
-  utter_search_stopped:
-  - text: "Okay, I have stopped the search."
-  - text: "Okay, the current search has been stopped."
-  - text: "Okay, the current search has been suspended."
-
-  utter_ask_what_to_change:
-  - text: "Now you can tell me what you want to change."
-  - text: "Could you remind me what you want to change?"
+  utter_ask_what_to_change_search:
+  - text: "Okay, could you remind me what you would like to change?"
+  - text: "Perfect, tell me again what you would like to change."
 
   # ------------------------------------------------------------------------- #
-  # SEARCH RESULTS
+  # RESULTS
   # ------------------------------------------------------------------------- #
 
-  utter_ask_which_results_to_show_2:
-  - text: "Could you please specify again which results you want me to show?"
+  utter_ask_which_results_to_select:
+  - text: "Which results would you like to select?"
+  - text: "Which places do you want to select?"
+  - text: "Which places should I select for you?"
+
+  utter_ask_which_results_to_select_2:
+  - text: "Could you please specify again which results you want to select?"
   - text: "Could you tell me again which places you would like to select?"
-
-  utter_missing_search_parameters:
-  - text: "Sorry, but not all the required parameters for this search have been set. Would you like to provide them now?"
-  - text: "Sorry, but I can't proceed with the search because some required parameters are missing. Would you like to provide them now?"
 
   utter_no_results:
   - text: "Sorry, but this search didn't return any results. Try changing the search parameters."
   - text: "Sorry, but there are no results for this search. Maybe youcould try changing the search parameters."
+
+  utter_no_results_found:
+  - text: "Sorry, but I couldn't find any results with the specified criteria."
+  - text: "Sorry, but I didn't find any places with the specified criteria."
+
+  utter_cannot_delete_results:
+  - text: "Sorry, but you can't delete the search results. You can only delete the searches themselves."
+  - text: "Sorry, but I can't delete the search results."
+  - text: "Sorry, but you can't remove the search results. You can only delete the entire search."
+
+  # ------------------------------------------------------------------------- #
+  # BOOKING HISTORY
+  # ------------------------------------------------------------------------- #
+
+  utter_no_bookings:
+  - text: "Sorry, but you haven't made any bookings yet."
+  - text: "Sorry, but you haven't made any reservations yet."
+
+  utter_ask_which_bookings_to_select:
+  - text: "Which bookings would you like to select?"
+  - text: "Which bookings do you want to select?"
+  - text: "Which reservations should I select for you?"
+
+  utter_ask_which_bookings_to_select_2:
+  - text: "Could you please specify again which bookings you want to select?"
+  - text: "Could you tell me again which bookings you want to select?"
+  - text: "Could you specify again which reservations you want to select?"
+
+  utter_ask_which_bookings_to_delete:
+  - text: "Which bookings would you like to delete?"
+  - text: "Which bookings do you want to delete?"
+  - text: "Which reservations should I delete for you?"
+
+  utter_ask_which_bookings_to_delete_2:
+  - text: "Could you please specify again which bookings you want to delete?"
+  - text: "Could you tell me again which bookings you want to delete?"
+  - text: "Could you specify again which reservations you want to delete?"
+
+  utter_no_bookings_found:
+  - text: "Sorry, but I couldn't find any bookings with the specified criteria."
+  - text: "Sorry, but I didn't find any reservations with the specified criteria."
+
+  utter_deleted_bookings:
+  - text: "Okay, I have removed the selected bookings."
+  - text: "As you command, the selected bookings have been deleted."
+  - text: "It's done! The selected bookings have been deleted."
+
+  utter_cancel_delete_selected_bookings:
+  - text: "Okay, no bookings have been deleted."
+  - text: "Okay, the bookings will remain in your history."
+  - text: "Okay, the bookings have not been deleted."
+
+  # ------------------------------------------------------------------------- #
+  # BOOKING
+  # ------------------------------------------------------------------------- #
+
+  utter_start_booking:
+  - text: "Perfect, let's start the booking process."
+  - text: "Great, I will start booking {place_name} for you."
+  - text: "Got it, I will start the booking process for {place_name}."
+
+  utter_ask_stop_booking:
+  - text: "Are you sure you want to stop the booking?"
+  - text: "Do you really want to stop the booking?"
+  - text: "Are you sure you want to end the booking?"
+
+  utter_ask_booking_datetime:
+  - text: "When would you like to make the reservation?"
+  - text: "What date and time would you like to book for?"
+  - text: "Could you tell me the date and time you want to book for?"
+
+  utter_ask_booking_datetime_closed:
+  - text: "Sorry, but the restaurant is closed at that time. Could you choose another time?"
+  - text: "Sorry, but the place is not open at that time. Could you choose another time?"
+
+  utter_ask_booking_datetime_coarse:
+  - text: "Sorry, but could you provide a shorter time frame for the reservation?"
+  - text: "Could you be more specific about the time for the reservation?"
+  - text: "Sorry, but could you provide a more precise time for the reservation?"
+
+  utter_ask_booking_datetime_far:
+  - text: "Sorry, but the reservation is too far in the future. Could you choose a closer date?"
+  - text: "Sorry, but the reservation is too far ahead. Could you choose a closer date?"
+
+  utter_ask_booking_datetime_past:
+  - text: "Sorry, but you can't make a reservation in the past. Could you choose a future date?"
+  - text: "Sorry, but you can't book a table in the past. Could you choose a future date?"
+
+  utter_ask_booking_people_count:
+  - text: "Perfect, how many people will be attending the reservation?"
+  - text: "And, how many people will be attending the reservation on {datetime}?"
+  - text: "How many people will be joining the reservation on {datetime}?"
+
+  utter_ask_booking_people_count_small:
+  - text: "Sorry, but the reservation must be for at least one person."
+  - text: "Sorry, but you need to book for at least one person."
+
+  utter_ask_booking_people_count_large:
+  - text: "Sorry, but the reservation can't be for more than 10 people."
+  - text: "Sorry, but you can't book for more than 10 people."
+
+  utter_ask_booking_author:
+  - text: "Perfect, who is the booking for?"
+  - text: "And, who should I make the reservation for?"
+  - text: "Okay, and who is the reservation for?"
+
+  utter_ask_booking_author_with_name:
+  - text: "Okay, should I make the reservation for {user_name}?"
+  - text: "Good, is the reservation for {user_name}?"
+  - text: "Should I book for {user_name}?"
+
+  utter_cannot_modify_past_booking:
+  - text: "Sorry, but you can't modify a past booking. You can only modify future bookings."
+  - text: "Sorry, but you can't change a past reservation. You can only change future reservations."
+
+  utter_confirm_booking:
+  - text: |
+      Now, do you want to confirm the reservation for {people_count} people on {datetime}?
+      The reservation will be made for {author}.
   
+  utter_booking_created:
+  - text: "The reservation has been successfully created."
+  - text: "The reservation has been successfully made."
+
+  utter_booking_modified:
+  - text: "The reservation has been successfully modified."
+  - text: "The reservation has been successfully changed."
+
+  utter_cancel_booking:
+  - text: "Okay, I have canceled the operation. The reservation has not been made."
+  - text: "No problem, no reservation has been made."
+
+  utter_cancel_modify_booking:
+  - text: "Okay, I have canceled the operation. The reservation has not been modified."
+  - text: "No problem, no changes have been made to the reservation."
+
+  utter_ask_specify_search_first:
+  - text: "Sorry, but you first need to specify a search and select a result before booking."
+  - text: "Sorry, but you need to specify a search and select a result before booking."
+
+  utter_ask_which_result_to_book:
+  - text: "Which place would you like to book?"
+  - text: "Which result would you like to book?"
+  - text: "Which place should I book for you?"
+
+  utter_ask_select_one_result_to_book:
+  - text: "I can only book one place at a time. Which result would you like to book?"
+  - text: "You can only book one place at a time. Which result would you like to book?"
+  - text: "I can only book one place at a time. Which place would you like to book?"
+
+  utter_ask_select_booking_to_modify:
+  - text: "Which booking would you like to modify?"
+  - text: "Which reservation would you like to change?"
+  - text: "Which booking should I modify for you?"
+
+  utter_ask_select_one_booking_to_modify:
+  - text: "Please, select only one booking to modify."
+  - text: "You can only modify one reservation at a time. Please select one."
+  - text: "I can only modify one reservation at a time. Please select one."
+
+  utter_no_booking_selected:
+  - text: "Sorry but you haven't selected any booking."
+  - text: "I can't proceed without knowing which booking you are referring to."
+
+  utter_ask_select_booking_to_select:
+  - text: "Which booking would you like to select?"
+  - text: "Which reservation do you want to select?"
+  - text: "Which booking should I select for you?"
+
+  utter_multiple_bookings_selected:
+  - text: "Sorry, but you have multiple selected bookings so I can't proceed."
+  - text: "Sorry, but you have selected multiple reservations so I can't proceed."
+
+  utter_ask_what_to_change_booking:
+  - text: "Okay, could you remind me what you would like to change?"
+  - text: "Perfect, tell me again what you would like to change."
+
+  utter_suggest_booking:
+  - text: "Would you like to make a reservation for it?"
+  - text: "Do you want to book a table for it?"
+  - text: "Shall I make a reservation for it?"
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 # SESSION CONFIGURATION
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #

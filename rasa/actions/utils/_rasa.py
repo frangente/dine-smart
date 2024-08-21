@@ -82,7 +82,7 @@ def get_slot(
     Returns:
         The value of the slot or the default value if the slot is not set.
     """
-    slot = tracker.slots.get(slot_name)
+    slot = tracker.current_slot_values().get(slot_name)
     return slot if slot is not None else default
 
 
@@ -144,11 +144,13 @@ def get_entity_values(
     ]
 
 
-def get_intents(tracker: Tracker) -> list[str]:
+def get_last_intents(tracker: Tracker, split_symbol: str | None = "+") -> list[str]:
     """Gets the intents of the latest message.
 
     Args:
         tracker: The tracker.
+        split_symbol: The symbol to split the intent name. If `None`, the intent name
+            is returned as a list with a single element.
 
     Returns:
         The intents of the latest message.
@@ -157,7 +159,10 @@ def get_intents(tracker: Tracker) -> list[str]:
     if not intent:
         return []
 
-    return intent[INTENT_NAME_KEY].split("+")
+    if split_symbol is None:
+        return [intent[INTENT_NAME_KEY]]
+
+    return intent[INTENT_NAME_KEY].split(split_symbol)
 
 
 def count_action_inside_form(tracker: Tracker, action_name: str) -> int:
@@ -194,18 +199,30 @@ _ALL_MENTIONED = [
     "all",
     "every",
     "each",
-    "them",
     "everything",
-    "these",
-    "those",
-    "their",
-    "theirs",
-    "they",
-    "themself",
-    "themselves",
     "everyone",
     "everybody",
     "everything",
+]
+
+_CURRENT_MENTIONED = [
+    "current",
+    "selected",
+    "chosen",
+    "picked",
+    "highlighted",
+    "this",
+    "that",
+    "it",
+    "its",
+    "those",
+    "these",
+    "they",
+    "them",
+    "their",
+    "theirs",
+    "themself",
+    "themselves",
 ]
 
 
@@ -237,11 +254,14 @@ async def resolve_mentions(  # noqa: C901, PLR0912, PLR0915
     candidates = []
     errors = []
     for mention in get_entity_values(tracker, "mention"):
-        if any(word in mention for word in _ALL_MENTIONED):
+        if any(word in mention for word in _CURRENT_MENTIONED):
             if selected:
                 candidates.extend(selected)
             else:
-                candidates.extend(range(num_entities))
+                msg = f"you haven't selected any {entity_type} yet"
+                errors.append(msg)
+        if any(word in mention for word in _ALL_MENTIONED):
+            candidates.extend(range(num_entities))
         elif "current" in mention or "selected" in mention:
             if selected:
                 candidates.extend(selected)

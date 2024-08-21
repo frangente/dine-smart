@@ -1,32 +1,44 @@
 # Copyright 2024 Francesco Gentile.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import Any
+from datetime import datetime
 
 import gcp.maps
 import rapidfuzz
 from gcp.maps import places
 from geopy import distance
 
+from actions.records import BookingParameters, SearchParameters
+
 from ._grammar import pluralize
-from ._misc import deserialize
 
 # --------------------------------------------------------------------------- #
 # Constants
 # --------------------------------------------------------------------------- #
 
-_ALTERNATIVE_PARAMETERS = [
-    "activity",
-    "meal_type",
-    "cuisine_type",
-    "place_type",
-    "place_name",
+_LOCATION_FIELDS = [
+    "viewport",
+    "short_formatted_address",
 ]
-_LOCATION_FIELDS = ["id", "viewport", "short_formatted_address"]
 _PLACE_FIELDS = [
     "display_name",
     "primary_type_display_name",
     "short_formatted_address",
+    "national_phone_number",
+    "price_level",
+    "rating",
+    "website_uri",
+    "allows_dogs",
+    "good_for_children",
+    "menu_for_children",
+    "parking_options",
+    "payment_options",
+    "outdoor_seating",
+    "reservable",
+    "restroom",
+    "serves_vegetarian_food",
+    "takeout",
+    "regular_opening_hours",
 ]
 _USER_LOCATION_EXAMPLES = {
     "my location",
@@ -43,44 +55,78 @@ _USER_LOCATION_EXAMPLES = {
     "where i reside",
 }
 
-_client = gcp.maps.Client()
+_client: gcp.maps.Client | None = None
+
+
+def _get_client() -> gcp.maps.Client:
+    """Returns the Google Maps client."""
+    global _client  # noqa: PLW0603
+    if _client is None:
+        _client = gcp.maps.Client()
+    return _client
+
 
 # --------------------------------------------------------------------------- #
 # Search parameters
 # --------------------------------------------------------------------------- #
 
 
-def get_search_title(parameters: dict[str, Any]) -> str:
-    """Generates a title for the search."""
-    location = parameters["location"]["short_formatted_address"]
-    if parameters.get("place_name"):
-        title = f"search for {parameters['place_name']}"
-        if location:
-            title += f" near {location}"
+def is_place_open(place: places.Place, dt: datetime) -> bool:
+    """Checks if the place is open at the given time."""
+    if place.regular_opening_hours is None:
+        msg = "The place does not have regular opening hours."
+        raise ValueError(msg)
+
+    opening_hours = place.regular_opening_hours.periods[dt.weekday()]
+
+    is_open = False
+    for start, end in opening_hours:
+        match start, end:
+            case None, None:
+                is_open = True
+                break
+            case None, _:
+                if dt.time() < end:  # type: ignore
+                    is_open = True
+                    break
+            case _, None:
+                if dt.time() >= start:
+                    is_open = True
+                    break
+            case _, _:
+                if start <= dt.time() < end:
+                    is_open = True
+                    break
+
+    return is_open
+
+
+def get_search_title(parameters: SearchParameters) -> str:
+    """Returns the title of the search to be displayed to the user."""
+    if parameters.place_name:
+        return (
+            f"search for {parameters.place_name} near "
+            f"{parameters.location.short_formatted_address}"
+        )
+
+    if parameters.place_type:
+        place_type = pluralize(parameters.place_type)
+    elif parameters.activity == "eat":
+        place_type = "places to eat"
+    elif parameters.activity == "drink":
+        place_type = "places to have a drink"
     else:
-        activity = parameters.get("activity")
-        place_type = parameters.get("place_type")
-        meal_type = parameters.get("meal_type")
-        cuisine_type = parameters.get("cuisine_type")
+        place_type = "places to go"
 
-        if place_type:
-            place_type = pluralize(place_type)
-        elif activity == "eat":
-            place_type = "places to eat"
-        elif activity == "drink":
-            place_type = "places to have a drink"
-        else:
-            place_type = "places"
+    title = "search for "
+    if parameters.cuisine_type:
+        title += f"{parameters.cuisine_type} "
+    title += place_type
 
-        title = "search for "
-        if cuisine_type:
-            title += f"{cuisine_type} "
-        title += f"{place_type}"
+    if parameters.meal_type:
+        title += f" for {parameters.meal_type}"
 
-        if meal_type:
-            title += f" for {meal_type}"
-        title += f" near {location}"
-
+    title += f" near {parameters.location.short_formatted_address}"
     return title
 
 
@@ -93,16 +139,13 @@ def get_place_title(place: places.Place) -> str:
     return title
 
 
-def validate_search_parameters(
-    params: dict[str, Any],
-    *,
-    include_location: bool = True,
-) -> bool:
-    """Checks if the required parameters are present in the search."""
-    if include_location and "location" not in params:
-        return False
+def get_booking_title(parameters: BookingParameters) -> str:
+    """Returns the title of the booking to be displayed to the user."""
+    place_name = parameters.place.display_name.text  # type: ignore
+    dt = parameters.date.strftime("%A, %B %d, %Y at %I:%M %p")
+    num_people = parameters.num_people
 
-    return any(params.get(p) for p in _ALTERNATIVE_PARAMETERS)
+    return f"reservation for {num_people} people at {place_name} on {dt}"
 
 
 # --------------------------------------------------------------------------- #
@@ -112,7 +155,8 @@ def validate_search_parameters(
 
 def is_user_location(text: str) -> bool:
     """Checks if the text is a user-like location."""
-    return text.lower() in _USER_LOCATION_EXAMPLES
+    text = text.lower()
+    return any(phrase in text for phrase in _USER_LOCATION_EXAMPLES)
 
 
 async def find_location(
@@ -137,7 +181,8 @@ async def find_location(
     Returns:
         A list of locations matching the given text.
     """
-    locations, _ = await _client.search_places_by_text(
+    client = _get_client()
+    locations, _ = await client.search_places_by_text(
         query=query,
         fields=_LOCATION_FIELDS,
         page_size=5,
@@ -243,7 +288,8 @@ async def find_parkings(
     max_distance: int = 500,
 ) -> list[places.Place]:
     """Finds parkings near the given location."""
-    parkings = await _client.search_nearby_places(
+    client = _get_client()
+    parkings = await client.search_nearby_places(
         area=places.CircularArea(location, max_distance),
         fields=["location"],
         included_primary_types=["parking"],
@@ -259,65 +305,57 @@ async def find_parkings(
 # --------------------------------------------------------------------------- #
 
 
-async def find_places(
-    parameters: dict[str, Any],
-    *,
-    start_new_search: bool = True,
-    return_n: int = 20,
+async def find_places(  # noqa: C901
+    parameters: SearchParameters,
+    return_n: int = 15,
 ) -> list[places.Place]:
     """Searches for places using the Google Places API.
 
     Args:
         parameters: The search parameters.
-        start_new_search: Whether to start a new search or continue from the previous
-            search results.
         return_n: The maximum number of results to return.
 
     Returns:
         A list of places matching the search criteria.
     """
-    location = deserialize(places.Place, parameters["location"])
+    query = ""
+    if parameters.place_name:
+        query += parameters.place_name + " "
+    if parameters.cuisine_type:
+        query += parameters.cuisine_type + " "
+    if parameters.place_type:
+        query += parameters.place_type + " "
 
-    place_name = parameters.get("place_name")
-    place_type = parameters.get("place_type")
-    cuisine_type = parameters.get("cuisine_type")
-    meal_type = parameters.get("meal_type")
-    query = f"{place_name or ''} {cuisine_type or ''} {place_type or ''}"
-    if query and meal_type:
-        query += f" for {meal_type}"
+    if not query:
+        query = "places"
+
+    if parameters.meal_type:
+        query += f" for {parameters.meal_type}"
+
+    if parameters.activity == "eat":
+        included_type = "restaurant"
+    elif parameters.activity == "drink":
+        included_type = "bar"
     else:
-        query = meal_type or query
-    query = query.strip()
+        included_type = None
 
-    activity = parameters.get("activity")
-    match activity:
-        case "eat":
-            query = "places to eat"
-        case "drink":
-            query = "places to drink"
-        case _:
-            pass
-
-    rank_by = parameters.get("rank_by", "relevance")
-    open_now = parameters.get("open_now", False)
-    price_levels = _get_price_levels(parameters.get("price_range"))
-    min_rating = _get_min_rating(parameters.get("quality"))
-
-    next_page_token = None if start_new_search else parameters.get("next_page_token")
+    if query != "places":
+        included_type = None
 
     results = []
+    client = _get_client()
     while len(results) < return_n:
         page_size = min(20, return_n - len(results))
-        res, next_page_token = await _client.search_places_by_text(
+        res, next_page_token = await client.search_places_by_text(
             query=query,
             fields=_PLACE_FIELDS,
-            bias_area=location.viewport,
+            included_type=included_type,
+            bias_area=parameters.location.viewport,
             page_size=page_size,
-            next_page_token=next_page_token,
-            open_now=open_now,
-            price_levels=price_levels,
-            min_rating=min_rating,
-            rank_by=rank_by,
+            open_now=parameters.open_now or False,
+            price_levels=parameters.get_price_levels(),
+            min_rating=parameters.get_min_rating(),
+            rank_by=parameters.rank_by,
         )
 
         results.extend(res)
@@ -325,35 +363,3 @@ async def find_places(
             break
 
     return results
-
-
-def _get_price_levels(price_level: str | None) -> list[places.PriceLevel] | None:
-    match price_level:
-        case "any":
-            return None
-        case "expensive":
-            return [places.PriceLevel.EXPENSIVE, places.PriceLevel.VERY_EXPENSIVE]
-        case "moderate":
-            return [places.PriceLevel.MODERATE]
-        case "inexpensive":
-            return [places.PriceLevel.INEXPENSIVE]
-        case None:
-            return None
-        case _:
-            msg = f"Invalid price level: {price_level}"
-            raise ValueError(msg)
-
-
-def _get_min_rating(quality: str | None) -> float | None:
-    match quality:
-        case "any":
-            return None
-        case "excellent":
-            return 4.5
-        case "moderate":
-            return 3.5
-        case None:
-            return None
-        case _:
-            msg = f"Invalid quality: {quality}"
-            raise ValueError(msg)

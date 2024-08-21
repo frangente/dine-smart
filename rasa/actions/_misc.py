@@ -61,7 +61,7 @@ class OutOfScope(Action):
     ) -> list[dict[str, Any]]:
         api_key = os.getenv("GOOGLE_GEMINI_API_KEY")
         if api_key is None:
-            dispatcher.utter_message(template="utter_out_of_scope")
+            dispatcher.utter_message(response="utter_out_of_scope")
             return []
 
         genai.configure(api_key=api_key)
@@ -78,7 +78,7 @@ class OutOfScope(Action):
 
         response = await model.generate_content_async(tracker.latest_message["text"])
         text = " ".join(p.text for p in response.parts).strip()
-        dispatcher.utter_message(template="utter_out_of_scope_gemini", content=text)
+        dispatcher.utter_message(response="utter_out_of_scope_gemini", content=text)
 
         return []
 
@@ -126,8 +126,13 @@ class Restart(Action):
     ) -> list[dict[str, Any]]:
         # clear the database to avoid it growing indefinitely
         store = utils.get_kv_store()
+
         search_history = utils.get_slot(tracker, "search_history", [])
         for key in search_history:
-            del store[key]
+            store.delete_search(key)
+
+        booking_history = utils.get_slot(tracker, "booking_history", [])
+        for key in booking_history:
+            store.delete_booking(key)
 
         return [Restarted()]

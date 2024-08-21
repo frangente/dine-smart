@@ -9,44 +9,44 @@ nlu:
 - intent: search_place_to_eat_now
   examples: |
     - i am hungry
-    - search for a place to eat now
-    - i am hungry, where could I eat now?
+    - search for a place to eat [now](datetime)
+    - i am hungry, where could I eat [now](datetime)?
     - i haven't eaten yet, i have a desperate need for food
     - i want to eat something, where can i go?
     - i want to eat something
     - i am here with my friends and we are very hungry
     - i have just finished an exam and i am starving
     - my coworker and I would like to eat something together before we go back to work
-    - i am looking for a place to eat something now
-    - could you suggest a place to eat something now?
+    - i am looking for a place to eat something [now](datetime)
+    - could you suggest a place to eat something [now](datetime)?
     - i don't know where to eat, could you help me?
     - i am craving some food
-    - if i don't eat now, i will faint
-    - i am so hungry, i need to eat something now
+    - if i don't eat [now](datetime), i will faint
+    - i am so hungry, i need to eat something [now](datetime)
     - i have been walking all day, could you suggest me a place to eat?
     - i am craving something sweet, could you suggest me a [bakery](place_type) to go?
     - i need to eat something
     - need food
-    - food is the only thing on my mind right now
+    - food is the only thing on my mind right [now](datetime)
     - some food is the only thing that can make me feel better
     - this morning has been very stressful, i need to eat something
     - my stomach is growling, could you find me a [restaurant](place_type) to eat?
     - i haven't eaten all day, could you suggest me a [restaurant](place_type) to go?
-    - id love some [ice cream](cuisine_type) right now
+    - id love some [ice cream](cuisine_type) right [now](datetime)
     - i have a meeting in 5 minutes but i am starving
     - i have 5 minutes to eat something, any places where i can buy a [sandwich](cuisine_type)?
 
 - intent: search_place_to_drink_now
   examples: |
     - i am thirsty
-    - i am thirsty, where could I drink something now?
-    - some [cocktails](cuisine_type) would be great right now
+    - i am thirsty, where could I drink something [now](datetime)?
+    - some [cocktails](cuisine_type) would be great right [now](datetime)
     - i want to drink something
     - any [bar](place_type) around here where i can have a drink?
     - i am here with my friends and we want to have a drink
     - i have just finished an exam and i want to celebrate
     - my coworkers and I have just finished an important project, we want to celebrate
-    - i am looking for a place to drink something now
+    - i am looking for a place to drink something [now](datetime)
     - these last days have been very stressful, i need to drink something
     - i am so stressed, i need to let off some steam, where can i go?
     - after all these years of jard work, i have ben finally promoted, i need to celebrate
@@ -57,47 +57,57 @@ nlu:
 
 - intent: search_place_now
   examples: |
-    - find a place where to go now
-    - search to go now
-    - start search for a place to go now
-    - i am looking for a place to go now
+    - find a place where to go [now](datetime)
+    - search to go [now](datetime)
+    - start search for a place to go [now](datetime)
+    - i am looking for a place to go [now](datetime)
     - at home i was in a hurry so i couldn't have my [breakfast](meal_type), what do you suggest?
     - any places that sell [donuts](cuisine_type) around here?
     - i am in the mood for some [pizza](cuisine_type), could you suggest me a [restaurant](place_type)?
-    - any [bars](place_type) around here where i can go now?
+    - any [bars](place_type) around here where i can go [now](datetime)?
     - i am in the mood for some [beer](cuisine_type), could you suggest me a [pub](place_type)?
     - i am in the mood for some [wine](cuisine_type), could you suggest me a [wine bar](place_type)?
     - i feel like having a [cocktail](cuisine_type), could you suggest me a [bar](place_type)?
-    - i am here with my family and we are looking for a [bistro](place_type) where to go now
+    - i am here with my family and we are looking for a [bistro](place_type) where to go [now](datetime)
     - i am really craving some [sushi](cuisine_type), could you suggest me a place to go?
     - my friends and I want to have an [aperitif](meal_type), where can we go?
     - i don't wanna go home yet, any place where i can have an [aperitif](meal_type)?
     - i am feeling so sleepy, i need to drink a [coffee](cuisine_type) to wake up
     - i just had the most boring meeting ever, i need to drink a [coffee](cuisine_type) or i will fall asleep
-    - right now the only thing that can keep me awake is a [coffee](cuisine_type)
+    - right [now](datetime) the only thing that can keep me awake is a [coffee](cuisine_type)
     - i am so tired, find me a [coffee shop](place_type) to drink an [espresso](cuisine_type)
 
 - intent: search_place_to_eat
   examples: |
     - search for a place to eat
-    - tomorrow i have a very short break, so i need to find a place where i can eat quickly
+    - [tomorrow](datetime) i have a very short break, so i need to find a place where i can eat quickly
     - i am new to city, what are the best places where to eat [local food](cuisine_type)?
     - find me a place where i can go eat [pasta](cuisine_type) and [pizza](cuisine_type)
     - i am tired to eat alone at home, propose me some places where i can go eating surrounded by people
-    - next week I am going to [Bologna](location), some friends that have been there told me that food is fantastics, could you suggest me some places so that I can try it?
-    - next week I will discuss my thesis so I want to organize a [lunch](meal_type) with my friends, could you suggest me some places where to go?
+    - [next week](datetime) I am going to [Bologna](location), some friends that have been there told me that food is fantastics,  could you suggest me some places so that I can try it?
+    - [next week](datetime) I will discuss my thesis so I want to organize a [lunch](meal_type) with my friends, could you suggest me some places where to go?
+    - could you search for place where to eat some [sushi](cuisine_type)?
+    - [tomorrow](datetime) is my first day at work, i need to find a place where to have [lunch](meal_type) with my coworkers
+    - any idea about where to go for [dinner](meal_type) with my family?
+    - lookup some places where I can eat something
+    - suggest me some places where to eat something
+    - list some places where to eat some [pizza](cuisine_type)
+    - provide me with some places where to eat some [pasta](cuisine_type)
 
 - intent: search_place_to_drink
   examples: |
     - search for a place to drink
     - i am new to the city, where are the best places where to drink something?
-    - in the next days i will have some friends coming to visit me, where can we go to drink something?
-    - tomorrow i will be promoted, where can i go to celebrate?
-    - next week I will go to [Amsterdam](location), some friends that have been there have told me that there are some great places where to drink something, could you suggest me some?
-    - tomorrow is my birthday, my friends and I would like to go out for a drink, could you suggest me some places?
-    - tomorrow i have a date, could you suggest me some places where to go for a drink?
-    - tomorrow I will finally meet again my best friend, i was thinking to go to a [wine bar](place_type), could you suggest me some?
-    - tomorrow i will finally discuss my thesis, i need to celebrate, could you suggest me some places where to go for a drink?
+    - in [the next days](datetime) i will have some friends coming to visit me, where can we go to drink something?
+    - [tomorrow](datetime) i will be promoted, where can i go to celebrate?
+    - [next week](datetime) I will go to [Amsterdam](location), some friends that have been there have told me that there are some great places where to drink something, could you suggest me some?
+    - [tomorrow](datetime) is my birthday, my friends and I would like to go out for a drink, could you suggest me some places?
+    - [tomorrow](datetime) i have a date, could you suggest me some places where to go for a drink?
+    - [tomorrow](datetime) I will finally meet again my best friend, i was thinking to go to a [wine bar](place_type), could you suggest me some?
+    - [tomorrow](datetime) i will finally discuss my thesis, i need to celebrate, could you suggest me some places where to go for a drink?
+    - suggest some place where I can go to drink something
+    - could you provide me with a list of places where to go to have a [cocktail](cuisine_type)?
+    - any idea about where to go for a drink with my friends?
 
 - intent: search_place
   examples: |
@@ -119,20 +129,20 @@ nlu:
     - look if you can find a [bar](place_type) called [Duomo](place_name) in [Turin](location)
     - i am looking for a [restaurant](place_type) in [Ravenna](location)
     - i am looking for a [eatery](place_type), possibly near the [Colosseum](location)
-    - tomorrow is my first day at work, i need to find a place where to have [lunch](meal_type) with my coworkers
+    - [tomorrow](datetime) is my first day at work, suggest me some places where I can go with them
     - this thursday my family is coming to visit me, i need to find a place where to have [dinner](meal_type)
-    - tomorrow morning i start school an hour later, i would like to have [breakfast](meal_type) in a [cafe](place_type)
+    - [tomorrow](datetime) morning i start school an hour later, i would like to have [breakfast](meal_type) in a [cafe](place_type)
     - i am new to the city, any [pubs](place_type) around here where I can meet new people?
     - i am looking for a [restaurant](place_type) where to have [dinner](meal_type)
-    - tomorrow i am going out with my friends, could you suggest me a [restaurant](place_type)?
-    - this evening I have a date, could you lookup some [restaurants](place_type) for me?
-    - tomorrow is my first day at work, i need to find a place to have [lunch](meal_type) with my coworkers
-    - this thursday my family is coming to visit me, i need to find a place to have [dinner](meal_type)
+    - [tomorrow](datetime) i am going out with my friends, could you suggest me a [restaurant](place_type)?
+    - [this evening](datetime) I have a date, could you lookup some [restaurants](place_type) for me?
+    - start searching for something, we will set the filters later
+    - [this thursday](datetime) my family is coming to visit me, i need to find a place to have [dinner](meal_type)
     - my boss has invited me to have [lunch](meal_type) with him, could you suggest me a [restaurant](place_type)?
     - i am planning a trip to [Rome](location), could you suggest me some [restaurants](place_type) to try?
-    - tomorrow is my birthday, my friends and I would like to go out for [dinner](meal_type), could you suggest me some [restaurants](place_type)?
-    - tomorrow i go to school an hour later, i would like to have [breakfast](meal_type) in a [cafe](place_type)
-    - next week i am going to [Trento](location), could you suggest me some [restaurants](place_type) to try?
+    - [tomorrow](datetime) is my birthday, my friends and I would like to go out for [dinner](meal_type), could you suggest me some [restaurants](place_type)?
+    - [tomorrow](datetime) i go to school an hour later, i would like to have [breakfast](meal_type) in a [cafe](place_type)
+    - [next week](datetime) i am going to [Trento](location), could you suggest me some [restaurants](place_type) to try?
     - i always go to the same [restaurant](place_type), could you suggest me some new places to try?
     - i am curious to try some new [bakeries](place_type) in my area, could you suggest me some?
     - i need to organize my trip to [Genoa](location), could you lookup some [restaurants](place_type) for me?
@@ -146,10 +156,10 @@ nlu:
     - i am looking for a [bar](place_type) called [Urban Lab](place_name). do you know it?
     - do you know [Pasticceria il Duomo](place_name)?
     - any [bakery](place_type) around here where i can buy some [bread](cuisine_type)?
-    - my favorite [restaurant](place_type) is closed today, could you suggest me some alternatives?
+    - my favorite [restaurant](place_type) is closed [today](datetime), could you suggest me some alternatives?
     - some friends of mine are coming to visit me, could you suggest me some [restaurants](place_type) to take them to?
-    - next week i am going to [Milan](location) and i have heard that there are some great [pizzerias](place_type) there, could you suggest me some?
-    - tomorrow i wanna have [lunch](meal_type) with my coworkers, any places that serve [sushi](cuisine_type)?
+    - [next week](datetime) i am going to [Milan](location) and i have heard that there are some great [pizzerias](place_type) there, could you suggest me some?
+    - [tomorrow](datetime) i wanna have [lunch](meal_type) with my coworkers, any places that serve [sushi](cuisine_type)?
     - now i wanna search a [French](cuisine_type) [bistro](place_type)
     - let's now search for a [pizzeria](place_type) with also [vegan](cuisine_type) options
 
@@ -195,11 +205,20 @@ nlu:
     - make it a [pub](place_type)
     - if you can id prefer a [bistro](place_type)
     - i wanna go to a [tavern](place_type) in [Turin](location)
+    - i want to change the location to [Milan, Italy](location)
+    - the new location is [Milan, Italy](location)
+    - actually it should serve [pizza](cuisine_type)
+    - i want to change the cuisine to [Italian](cuisine_type)
+    - list only [restaurants](place_type) that serve [Italian](cuisine_type) food
+    - show me only [bars](place_type)
+    - do not show places that are not [pizzerias](place_type)
 
 # PRICE RANGE INTENTS
 
 - intent: inform_price_range_any
   examples: |
+    - it can have any price
+    - do not consider the price
     - do not filter by price
     - i don't care about the price
     - i don't have a preference for the price
@@ -232,9 +251,13 @@ nlu:
     - i want to impress my girlfriend, so i can spend a bit more
     - i have a certain standard, so i don't mind spending a lot
     - this is my last day in this city, i don't care about the price
+    - any price is good for me
+    - do not consider the price when searching for a place
+    - do not consider prices when showing me the places
 
 - intent: inform_price_range_expensive
   examples: |
+    - make sure that it is expensive
     - i want to spend a lot of money
     - select only the most expensive restaurants
     - i want to go to the most expensive restaurant in town
@@ -250,7 +273,11 @@ nlu:
     - i want to go somewhere fancy
     - it must be elegant
     - a luxurious place is a must
+    - it must be luxurious
     - i don't want to go to a place that is not high-end
+    - only expensive places
+    - high prices only
+    - show me only the results with high prices
 
 - intent: inform_price_range_moderate
   examples: |
@@ -271,6 +298,10 @@ nlu:
     - filter by moderate price
     - moderate price only
     - i don't want to go to a cheap place
+    - moderate price is fine
+    - good prices please
+    - show me only the results with moderate prices
+    - could you look for places with moderate prices?
 
 - intent: inform_price_range_inexpensive
   examples: |
@@ -292,11 +323,18 @@ nlu:
     - the cheaper the better
     - i am not one who spend a lot of money on food
     - i am not the kind of person who spends a lot of money on restaurants
+    - low prices please
+    - show me only the results with low prices
+    - could you look for places with low prices?
+    - cheap is good
 
 # QUALITY INTENTS
 
 - intent: inform_quality_any
   examples: |
+    - it can be any quality
+    - i do not care about reviews
+    - do not consider the reviews
     - i don't care about the quality
     - i do not trust reviews, so quality is not a relevant factor for me
     - i don't have a preference for the quality
@@ -313,6 +351,9 @@ nlu:
     - last time i trusted the reviews, i was disappointed, so i will not do it again
     - i don't care about the quality, i just want to eat something
     - it's not a special occasion so quality is not a relevant factor in this case
+    - any quality is good for me
+    - do not consider the quality when showing me the places
+    - show me the results with any rating
 
 - intent: inform_quality_excellent
   examples: |
@@ -345,6 +386,10 @@ nlu:
     - i haven't been to a restaurant in a while, so i want to go to the best place
     - i haven't seen my friend in a while, so i want this dinner to be special
     - high quality is not a must but it would be nice
+    - quality excellent
+    - ensure only excellent places
+    - show me the results with excellent ratings
+    - could you look up only places with excellent quality?
 
 - intent: inform_quality_moderate
   examples: |
@@ -377,6 +422,10 @@ nlu:
     - do I sound like the kind of person who goes to bad places?
     - i don't need to go to the best places, but at least not the worst
     - it's not a special occasion, so it doesn't have to be the best, but at least not the worst
+    - quality must be good
+    - ensure only good places
+    - could you look up only places with good quality?
+    - show me the results with good ratings
 
 # PRICE RANGE AND QUALITY INTENTS
 
@@ -392,6 +441,11 @@ nlu:
     - list everything without taking into consideration the price or the reviews
     - price is not a problem and i don't trust reviews, so search for any place
     - last time i trusted the reviews, i was disappointed, so i will not do it again, and i don't care about the price
+    - remove all filters, i don't care about the price or the quality
+    - everything is fine with me, i don't care about the price or the quality
+    - any price, any quality
+    - any price range, any quality
+    - do not consider the price or the quality
 
 - intent: inform_price_range_any+inform_quality_excellent
   examples: |
@@ -403,6 +457,11 @@ nlu:
     - i am not the one who will pay the bill, so take me to the best place
     - as long as the place has high ratings i am happy with the price
     - i wanna eat excellent food, i don't care about the price
+    - i don't care about the price, but the place has to be excellent
+    - i don't care about the price, but the place has to be top-notch
+    - make sure that the place is excellent, even if it's expensive
+    - any price, but top quality
+    - any price is ok with me, quality must be excellent
 
 - intent: inform_price_range_any+inform_quality_moderate
   examples: |
@@ -414,6 +473,12 @@ nlu:
     - do not filter based on price range, but make sure that the place is not bad
     - any price range is fine with me, as long as the place is not bad
     - price do not care, but good quality is a must
+    - i don't care about the price, but the place has to be good
+    - i don't care about the price, but the place has to be decent
+    - make sure that the place is not bad, even if it's expensive
+    - price range any, quality good
+    - any price is fine with me, as long as the place is good
+    - good place, any price range
 
 # price range: expensive
 - intent: inform_price_range_expensive+inform_quality_excellent
@@ -424,6 +489,14 @@ nlu:
     - i wanna show off, so only the best and most pricey places
     - i want to go to a high-end place, but it has to be excellent
     - i have to impress my boss, find me the most luxurious [restaurants](place_type)
+    - i want to go somewhere fancy, but it has to be excellent
+    - make sure that the place is top quality and that costs a fortune
+    - i don't want to go to a place that is not high-end and excellent
+    - i don't want to go to a place that is not luxurious and excellent
+    - list only those places that are expensive and excellent
+    - price expensive, quality excellent
+    - everything, prices and quality, must be top-notch
+    - high prices and top quality
 
 # price range: moderate
 - intent: inform_price_range_moderate+inform_quality_any
@@ -436,6 +509,11 @@ nlu:
     - price not too high, quality irrelevant
     - add the following constraints, the place should not be too expensive, ratings any
     - google maps ratings are not always reliable, so just make sure that the place is not too expensive
+    - i don't care about the quality, but it should not be too expensive
+    - make sure that the place is not too expensive, quality is not a must
+    - show me only places that have moderate prices, do not consider the quality
+    - no quality filter, decent prices
+    - good prices, quality irrelevant
 
 - intent: inform_price_range_moderate+inform_quality_excellent
   examples: |
@@ -448,6 +526,10 @@ nlu:
     - keep only places with high ratings, but not too expensive
     - consider only [bars](place_type) with a moderate price but high ratings
     - i wanna eat excellent food, but i don't want to spend too much
+    - make sure that the [restaurant](place_type) is excellent, but it should not be too expensive
+    - show me only places that have moderate prices, but are excellent
+    - moderate prices, top quality
+    - decent prices, excellent quality
 
 - intent: inform_price_range_moderate+inform_quality_moderate
   examples: |
@@ -458,6 +540,13 @@ nlu:
     - my friends and I do not wanna spend much, but we sould still like to spend a nice evening
     - my parents are gonna visit me, i don't want them to spend a lot, but i also want to take them to a good place
     - anything that is not bad but also does not cost a fortune?
+    - i don't wanna spend too much, but i also don't wanna go to a bad place
+    - make sure that both the price and the quality are good
+    - i don't wanna spend too much, but i also don't wanna go to a place that is not worth it
+    - show me only places that have moderate prices and good ratings
+    - price moderate, quality good
+    - decent prices, decent quality
+    - moderate prices and decent quality
 
 # price range: inexpensive
 - intent: inform_price_range_inexpensive+inform_quality_any
@@ -469,6 +558,11 @@ nlu:
     - do not filter by quality, just make sure that the place is cheap
     - price low, quality irrelevant
     - just need a cheap place, quality is not a must
+    - just make sure that the place is cheap, quality is not a must
+    - show me only places that have low prices, do not consider the quality
+    - could you search only for cheap places, do not care about the quality
+    - low prices, quality irrelevant
+    - price level inexpensive, quality irrelevant
 
 - intent: inform_price_range_inexpensive+inform_quality_excellent
   examples: |
@@ -478,6 +572,11 @@ nlu:
     - any places that are excellent but do not cost a fortune?
     - filter out places that do not have 5 stars, but also that do not cost a fortune
     - i am a student so i cannot afford pricey places, but i also love high quality food, where can i go?
+    - price low, quality excellent
+    - i am on a budget, but i still want to go to a place that is excellent
+    - can you please make sure that the place is excellent, even if it's cheap
+    - price very low, top quality
+    - make sure that the place is affordable, but also excellent
 
 - intent: inform_price_range_inexpensive+inform_quality_moderate
   examples: |
@@ -488,6 +587,13 @@ nlu:
     - keep only places with at least 3 stars and that cost few bucks
     - i don't have much money but i don't wanna feel sick after eating
     - i just need a [pub](place_type) where a [beer](cuisine_type) costs less than 5 bucks and the food is decent
+    - make sure that the place is not bad, even if it's cheap
+    - i am on a budget, but i still want to go to a place that is not bad
+    - could you look for places that are cheap but not bad?
+    - show me only places that have low prices, but they need to be decent
+    - price low, quality decent
+    - provide me with a list of places that are cheap but not bad
+    - quality good, price low
 
 # --------------------------------------------------------------------------- #
 # ORDERING INTENTS
@@ -498,6 +604,8 @@ nlu:
     - relevance
     - order by relevance
     - relevance order
+    - rank the results by relevance
+    - rank them by relevance
     - sort the results by relevance
     - put the results in relevance order
     - put the most relevant results first
@@ -514,6 +622,8 @@ nlu:
     - distance
     - order by distance
     - distance order
+    - rank the results by distance
+    - rank them by distance
     - sort the results by distance
     - put the results in distance order
     - put the closest results first
@@ -530,6 +640,8 @@ nlu:
 
 - intent: rank_results_by_unsupported
   examples: |
+    - rank the results based on their price
+    - rank them based on their quality
     - order the results based on their price
     - sort the results by their quality
     - put the results in price order
@@ -548,6 +660,7 @@ nlu:
 
 - intent: show_search_parameters
   examples: |
+    - what are the search parameters
     - what are the search parameters?
     - what are the search criteria?
     - could you tell me the search parameters?
@@ -576,19 +689,6 @@ nlu:
     - tell me the search criteria that are being used
     - tell me the search filters that are being used
     - any idea about the search options that are being used?
+    - could you tell me the search settings that are being used?
+    - could you tell me the current search parameters?
 
-- intent: show_search_results
-  examples: |
-    - show me the results
-    - list the results
-    - show the results
-    - display the results
-    - show me the results of the search
-    - list the results of the search
-    - show me the [next five](mention) results
-    - show me the [previous](mention) results
-    - show me the [next](mention) results
-    - show me the [first](mention) results
-    - show me the [last](mention) results
-    - display the [first three](mention) results
-    - select the [first three](mention) results

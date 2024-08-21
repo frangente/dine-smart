@@ -11,45 +11,51 @@ assistant_id: "dine-smart"
 language: en
 
 pipeline:
-# - name: components.SpellChecker
-#   api_key_env_var: BING_SEARCH_V7_SUBSCRIPTION_KEY
-#   default_locale: en-US
+- name: components.SpellChecker
+  api_key_env_var: BING_SEARCH_V7_SUBSCRIPTION_KEY
+  default_locale: en-US
 - name: WhitespaceTokenizer
   intent_tokenization_flag: True
   intent_split_symbol: "+"
-- name: LanguageModelFeaturizer
-  model_name: "roberta"
-  model_weights: "roberta-base"
+- name: LexicalSyntacticFeaturizer
+- name: CountVectorsFeaturizer
 - name: CountVectorsFeaturizer
   analyzer: char_wb
   min_ngram: 1
   max_ngram: 4
+- name: LanguageModelFeaturizer
+  model_name: "roberta"
+  model_weights: "roberta-base"
 - name: DIETClassifier
-  epochs: 100
+  epochs: 50
   constrain_similarities: true
   use_gpu: true
-# - name: EntitySynonymMapper
-# - name: components.SemanticChecker
-#   default_locale: en
-#   model_name: "all-MiniLM-L6-v2"
-#   min_cosine_similarity: 0.5
-#   entities:
-#   - type: place_type
-#     template: a place where people can eat or drink
+- name: components.SemanticChecker
+  default_locale: en
+  model_name: "all-MiniLM-L6-v2"
+  min_cosine_similarity: 0.5
+  entities:
+  - type: place_type
+    template: a place where people can eat or drink
 - name: FallbackClassifier
-  threshold: 0.3
-  ambiguity_threshold: 0.1
+  threshold: 0.2
+  ambiguity_threshold: 0.0
+- name: ResponseSelector
+  epochs: 100
+  retrieval_intent: help
+  constrain_similarities: true
 
 # Configuration for Rasa Core.
 # https://rasa.com/docs/rasa/core/policies/
 policies:
 - name: AugmentedMemoizationPolicy
+  max_history: 10
 - name: RulePolicy
   core_fallback_threshold: 0.3
   core_fallback_action_name: action_default_fallback
   enable_fallback_prediction: True
 - name: TEDPolicy
   max_history: 10
-  epochs: 100
+  epochs: 50
   constrain_similarities: true
   use_gpu: true

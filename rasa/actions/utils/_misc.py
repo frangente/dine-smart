@@ -1,10 +1,13 @@
 # Copyright 2024 Francesco Gentile.
 # SPDX-License-Identifier: Apache-2.0
 
+import dataclasses
+import datetime
 from collections.abc import Iterable
 from typing import Any, TypeVar
 
 import serde
+from gcp.maps import places
 
 
 def join(
@@ -56,6 +59,22 @@ _T = TypeVar("_T")
 
 def deserialize(cls: type[_T], x: dict[str, Any], /) -> _T:
     """Deserializes an object from a dictionary."""
+    if cls is places.Place:
+        opening_hours = x.pop("regular_opening_hours", None)
+        place = serde.from_dict(cls, x)
+        if opening_hours:
+            periods = [[] for _ in range(7)]
+            for idx, day_periods in enumerate(opening_hours["periods"]):
+                for s, e in day_periods:
+                    s = datetime.time.fromisoformat(s) if s else None  # noqa: PLW2901
+                    e = datetime.time.fromisoformat(e) if e else None  # noqa: PLW2901
+                    periods[idx].append((s, e))
+
+            description = opening_hours["weekday_descriptions"]
+            opening_hours = places.OpeningHours(periods, description)
+            place = dataclasses.replace(place, regular_opening_hours=opening_hours)
+        return place
+
     return serde.from_dict(cls, x)
 
 

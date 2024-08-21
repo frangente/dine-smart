@@ -1,0 +1,109 @@
+version: "3.1"
+
+nlu:
+
+- intent: help/general
+  examples: |
+    - help
+    - help me
+    - can you help me
+    - I need help
+    - can you help me with something
+    - i need your assistance
+    - can you assist me
+    - please help me
+    - i need some help
+    - i need your help
+
+- intent: help/capabilities
+  examples: |
+    - help me understand your capabilities
+    - what can you do
+    - what are your capabilities
+    - what are you capable of
+    - could you tell me what you can do
+    - what are your features
+    - what are your functions
+    - what are your abilities
+    - tell me about your capabilities
+    - tell me about your skills
+    - tell me about your features
+    - list your capabilities
+    - list your features
+    - list your functions
+    - list your abilities
+    - provide me with a list of your capabilities
+
+- intent: help/search
+  examples: |
+    - how can I search
+    - how can I start a search
+    - show me how to search
+    - tell me how to search
+    - how do I search
+    - how do I start a search
+    - how do I begin a search
+    - how do I initiate a search
+    - how can I start performing a search
+    - how can I start searching
+    - how can I start looking for a place
+    - can you describe me the search process
+    - can you tell me how to search for a place
+
+- intent: help/search_parameters
+  examples: |
+    - what parameters can I search by
+    - what can I search by
+    - what search parameters are available
+    - could you tell me which search parameters I can use
+    - what are the search options that I can use
+    - what are the search details that I can use
+    - what can I specify when searching
+    - what can I specify when performing a search
+    - what are the parameters that I can set when searching for a place
+    - list the settings that I can use when searching for a place
+
+- intent: help/info
+  examples: |
+    - what can I ask about a place
+    - what information can I get about a place
+    - what can I find out about a result
+    - what can you tell me about the results
+    - what information can you provide about a place
+    - what can you tell me about a place
+    - tell me about the information you have on a place
+    - what info can you provide about the places
+    - what info can I get for a place?
+    - what info can I get for a result?
+    - what can I ask about a result?
+    - list the information that I can get about a place
+
+- intent: help/booking
+  examples: |
+    - how can I book a place
+    - how can I make a reservation
+    - how do I book a place
+    - how do I make a reservation
+    - how can I reserve a place
+    - how do I reserve a place
+    - how can I make a booking
+    - how do I make a booking
+    - how can I reserve a table
+    - how do I reserve a table
+    - can you tell me how to book a place
+    - can you describe me the booking process
+
+- intent: help/booking_parameters
+  examples: |
+    - what parameters can I book by
+    - what can I book by
+    - what are the booking parameters
+    - what booking parameters are available
+    - could you tell me which booking parameters I can use
+    - what are the booking options that I can use
+    - what can I specify when booking a place
+    - what can I specify when making a reservation
+    - what can I specify when reserving a place
+    - list the settings that I can use when booking a place
+    - list the parameters that I can set when booking a place
+    - list the options that I can use when booking a place

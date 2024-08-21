@@ -1,0 +1,89 @@
+version: "3.1"
+
+rules:
+
+# --------------------------------------------------------------------------- #
+# SHOW RESULTS
+# --------------------------------------------------------------------------- #
+
+- rule: the user wants to see the results
+  steps:
+  - intent: show_results
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_show_selected_results
+
+- rule: the user wants to see the results after the search
+  steps:
+  - action: action_search
+  - or:
+    - intent: select_results
+    - intent: select
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_show_selected_results
+
+- rule: the user has just finished a search and wants to other results
+  steps:
+  - action: action_show_selected_results
+  - or:
+    - intent: select_results
+    - intent: select
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_show_selected_results
+
+- rule: the user has changed the ranking of the results and now wants to see them
+  steps:
+  - action: action_change_search_rank_by
+  - or:
+    - intent: select_results
+    - intent: select
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_show_selected_results
+
+- rule: the user has 
+  steps:
+  - action: action_retrieve_place_info
+  - or:
+    - intent: select_results
+    - intent: select
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_show_selected_results
+
+- rule: inform the user that there are no results
+  steps:
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: no_results
+  - action: utter_no_results
+
+# --------------------------------------------------------------------------- #
+# DELETE RESULTS
+# --------------------------------------------------------------------------- #
+
+- rule: if the user wants to delete some results, inform them it is not possible
+  steps:
+  - intent: delete_results
+  - action: utter_cannot_delete_results
+  - action: utter_ask_further_help_2
+
+- rule: if the user wants to delete some results, inform them it is not possible (2)
+  steps:
+  - action: action_show_selected_results
+  - intent: delete
+  - action: utter_cannot_delete_results
+  - action: utter_ask_further_help_2

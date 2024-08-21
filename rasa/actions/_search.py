@@ -4,16 +4,24 @@
 from typing import Any
 
 from gcp.maps import places
-from rasa_sdk import Action, Tracker
-from rasa_sdk.events import SlotSet
+from rasa_sdk import Action, FormValidationAction, Tracker
+from rasa_sdk.events import FollowupAction, SlotSet
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.types import DomainDict
 
 from rasa.shared.nlu.constants import ENTITY_ATTRIBUTE_VALUE
 
 from . import utils
+from .records import SearchData, SearchParameters
 
 _PAGE_SIZE = 5
+_ALTERNATIVE_PARAMETERS = [
+    "activity",
+    "meal_type",
+    "cuisine_type",
+    "place_type",
+    "place_name",
+]
 
 # --------------------------------------------------------------------------- #
 # Form-related Actions
@@ -21,11 +29,35 @@ _PAGE_SIZE = 5
 
 
 @utils.handle_action_exceptions
-class SetSearchParameters(Action):
-    """Sets the search parameters based on the user's input."""
+class ValidateSearchForm(FormValidationAction):
+    """Action used to validate the search form."""
 
     def name(self) -> str:
-        return "action_set_search_key"
+        return "validate_search_form"
+
+    async def required_slots(
+        self,
+        domain_slots: list[str],
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> list[str]:
+        alt_slots_set = any(
+            utils.get_slot(tracker, f"search_{slot}") is not None
+            for slot in _ALTERNATIVE_PARAMETERS
+        )
+        if alt_slots_set:
+            return ["search_location"]
+
+        return ["search_place_type", "search_location"]
+
+
+@utils.handle_action_exceptions
+class SetSearchPlaceType(Action):
+    """Action used to set the search place type."""
+
+    def name(self) -> str:
+        return "action_set_search_place_type"
 
     async def run(
         self,
@@ -33,151 +65,137 @@ class SetSearchParameters(Action):
         tracker: Tracker,
         domain: DomainDict,
     ) -> list[dict[str, Any]]:
-        history = utils.get_slot(tracker, "search_history", [])
-        idx = utils.get_slot(tracker, "selected_searches")[0]
-
-        store = utils.get_kv_store()
-        parameters = store[history[idx]]["parameters"]
-
-        error_slots = {}
-
-        # parameters for which no validation check is needed
-        valid_params = {
-            "place_name": await self._get_place_name(tracker),
-            "open_now": await self._get_open_now(tracker),
-            "activity": await self._get_activity(tracker),
-            "cuisine_type": await self._get_cuisine_type(tracker),
-            "price_range": await self._get_price_range(tracker),
-            "quality": await self._get_quality(tracker),
-        }
-        valid_params = {k: v for k, v in valid_params.items() if v is not None}
-        parameters.update(valid_params)
-
-        location, errors = await self._extract_location(tracker, parameters)
-        if location or errors:
-            parameters["location"] = location
-            error_slots.update(errors)
-
-        place_type, errors = await self._extract_place_type(tracker, parameters)
-        if place_type or errors:
-            parameters["place_type"] = place_type
-            error_slots.update(errors)
-
-        new_search = {"parameters": parameters}
-        store[history[idx]] = new_search
-
-        events = [SlotSet(k, v) for k, v in error_slots.items()]
-
-        if utils.validate_search_parameters(parameters):
-            events.append(SlotSet("search_key", history[idx]))
-        else:
-            events.append(SlotSet("search_key", None))
-
-        return events
-
-    async def _extract_location(  # noqa: PLR0912
-        self,
-        tracker: Tracker,
-        parameters: dict[str, Any],
-    ) -> tuple[dict[str, Any] | None, dict[str, Any]]:
-        user_location = utils.get_slot(tracker, "user_location")
-        entities = utils.get_entity_values(tracker, "location")
+        entities = utils.get_entities(tracker, "place_type")
         if not entities:
-            slots = {}
-            if parameters.get("location"):
-                location = parameters["location"]
-            elif user_location and parameters.get("open_now", False):
-                location = user_location
-            else:
-                location = None
-        else:
-            entity = entities[0]
-            if utils.is_user_location(entity):
-                if not user_location:
-                    location = None
-                    slots = {
-                        "invalid_location": None,
-                        "invalid_location_reasons": ["unknown_user_location"],
-                    }
-                else:
-                    location = user_location
-                    slots = {
-                        "invalid_location": None,
-                        "invalid_location_reasons": None,
-                    }
-            else:
-                reasons = utils.get_slot(tracker, "invalid_location_reasons", [])
-                fill_user_location = (
-                    "inform_my_location" in utils.get_intents(tracker)
-                    or "unknown_user_location" in reasons
-                )
-                if reasons and reasons[-1] == "ambiguous":
-                    invalid = utils.get_slot(tracker, "invalid_location")
-                    if invalid is None:
-                        msg = "invalid_location is None, but it should not be."
-                        raise RuntimeError(msg)
+            return []
 
-                    location = utils.merge_locations(invalid, entity)
-
-                candidates = await utils.find_location(
-                    entity,
-                    utils.deserialize(places.Place, user_location)
-                    if user_location
-                    else None,
-                )
-                if len(candidates) != 1:
-                    reasons += ["ambiguous" if candidates else "not_found"]
-                    location = None
-                    slots = {
-                        "invalid_location": location,
-                        "invalid_location_reasons": reasons,
-                    }
-                else:
-                    location = utils.serialize(candidates[0])
-                    slots = {
-                        "invalid_location": None,
-                        "invalid_location_reasons": None,
-                    }
-
-                    if fill_user_location:
-                        slots["user_location"] = location  # type: ignore
-
-        return location, slots
-
-    async def _extract_place_type(
-        self,
-        tracker: Tracker,
-        parameters: dict[str, Any],
-    ) -> tuple[str | None, dict[str, Any]]:
-        types = utils.get_entities(tracker, "place_type")
-        if not types:
-            return parameters.get("place_type"), {}
-
-        if types[0].get("is_correct", True):
-            place_type = types[0][ENTITY_ATTRIBUTE_VALUE]
-            invalid = False
+        if entities[0].get("is_correct", True):
+            place_type = entities[0][ENTITY_ATTRIBUTE_VALUE]
+            error = False
         else:
             place_type = None
-            invalid = True
+            error = True
 
-        return place_type, {"invalid_place_type": invalid}
+        return [
+            SlotSet("search_place_type", place_type),
+            SlotSet("search_place_type_error", error),
+        ]
 
-    async def _get_place_name(self, tracker: Tracker) -> str | None:
-        name = utils.get_entity_values(tracker, "place_name")
-        return name[0] if name else None
 
-    async def _get_open_now(self, tracker: Tracker) -> bool | None:
+@utils.handle_action_exceptions
+class SetSearchLocation(Action):
+    """Action used to set the search location."""
+
+    def name(self) -> str:
+        return "action_set_search_location"
+
+    async def run(  # noqa: PLR0911
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> list[dict[str, Any]]:
+        user_location = utils.get_slot(tracker, "user_location")
+        if utils.is_user_location(tracker.latest_message["text"]):
+            if user_location is None:
+                return [
+                    SlotSet("search_location", None),
+                    SlotSet("search_location_error", [("unknown_user_location", None)]),
+                ]
+
+            return [
+                SlotSet("search_location", user_location),
+                SlotSet("search_location_error", None),
+            ]
+
+        entities = utils.get_entity_values(tracker, "location")
+        if not entities:
+            location = utils.get_slot(tracker, "search_location")
+            error = utils.get_slot(tracker, "search_location_error")
+            if location or error:
+                return []
+
+            open_now = utils.get_slot(tracker, "search_open_now")
+            if open_now and user_location:
+                return [
+                    SlotSet("search_location", user_location),
+                    SlotSet("search_location_error", None),
+                ]
+
+            return []
+
+        entity = entities[0]
+        error = utils.get_slot(tracker, "search_location_error", [])
+        fill_user_location = [
+            "inform_my_location" in utils.get_last_intents(tracker),
+            any(reason == "unknown_user_location" for reason, _ in error),
+        ]
+        if error and error[-1][0] == "ambiguous":
+            entity = utils.merge_locations(error[-1][1], entity)
+
+        candidates = await utils.find_location(
+            entity,
+            utils.deserialize(places.Place, user_location) if user_location else None,
+        )
+        if len(candidates) != 1:
+            error.append(("ambiguous" if candidates else "not_found", entity))
+            location = None
+            return [
+                SlotSet("search_location", location),
+                SlotSet("search_location_error", error),
+            ]
+
+        location = utils.serialize(candidates[0])
+        slots = [
+            SlotSet("search_location", location),
+            SlotSet("search_location_error", None),
+        ]
+        if fill_user_location:
+            slots.append(SlotSet("user_location", location))
+
+        return slots
+
+
+@utils.handle_action_exceptions
+class SetSearchOpenNow(Action):
+    """Action used to set the search open now flag."""
+
+    def name(self) -> str:
+        return "action_set_search_open_now"
+
+    async def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> list[dict[str, Any]]:
         open_now = None
-        for intent in utils.get_intents(tracker):
+        for intent in utils.get_last_intents(tracker):
             if intent.endswith("now"):
                 open_now = True
                 break
 
-        return open_now
+        if open_now is None:
+            return []
 
-    async def _get_activity(self, tracker: Tracker) -> str | None:
+        return [SlotSet("search_open_now", open_now)]
+
+
+@utils.handle_action_exceptions
+class SetSearchActivity(Action):
+    """Action used to set the search activity."""
+
+    def name(self) -> str:
+        return "action_set_search_activity"
+
+    async def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> list[dict[str, Any]]:
         activity = None
-        for intent in utils.get_intents(tracker):
+        for intent in utils.get_last_intents(tracker):
             if "eat" in intent:
                 activity = "eat"
                 break
@@ -185,15 +203,27 @@ class SetSearchParameters(Action):
                 activity = "drink"
                 break
 
-        return activity
+        if activity is None:
+            return []
 
-    async def _get_cuisine_type(self, tracker: Tracker) -> str | None:
-        types = utils.get_entity_values(tracker, "cuisine_type")
-        return types[0] if types else None
+        return [SlotSet("search_activity", activity)]
 
-    async def _get_price_range(self, tracker: Tracker) -> str | None:
+
+@utils.handle_action_exceptions
+class SetSearchPriceRange(Action):
+    """Action used to set the search price range."""
+
+    def name(self) -> str:
+        return "action_set_search_price_range"
+
+    async def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> list[dict[str, Any]]:
         price_range = None
-        for intent in utils.get_intents(tracker):
+        for intent in utils.get_last_intents(tracker):
             match intent:
                 case "inform_price_range_any":
                     price_range = "any"
@@ -206,11 +236,27 @@ class SetSearchParameters(Action):
                 case _:
                     continue
 
-        return price_range
+        if price_range is None:
+            return []
 
-    async def _get_quality(self, tracker: Tracker) -> str | None:
+        return [SlotSet("search_price_range", price_range)]
+
+
+@utils.handle_action_exceptions
+class SetSearchQuality(Action):
+    """Action used to set the search quality."""
+
+    def name(self) -> str:
+        return "action_set_search_quality"
+
+    async def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> list[dict[str, Any]]:
         quality = None
-        for intent in utils.get_intents(tracker):
+        for intent in utils.get_last_intents(tracker):
             match intent:
                 case "inform_quality_any":
                     quality = "any"
@@ -221,15 +267,18 @@ class SetSearchParameters(Action):
                 case _:
                     continue
 
-        return quality
+        if quality is None:
+            return []
+
+        return [SlotSet("search_quality", quality)]
 
 
 @utils.handle_action_exceptions
-class AskForSearchParameters(Action):
-    """Asks the user for the search parameters."""
+class AskSearchPlaceType(Action):
+    """Action to ask the user for the search place type."""
 
     def name(self) -> str:
-        return "action_ask_search_key"
+        return "action_ask_search_place_type"
 
     async def run(
         self,
@@ -237,101 +286,83 @@ class AskForSearchParameters(Action):
         tracker: Tracker,
         domain: DomainDict,
     ) -> list[dict[str, Any]]:
-        search_history = utils.get_slot(tracker, "search_history", [])
-        idx = utils.get_slot(tracker, "selected_searches")[0]
-
-        search_key = search_history[idx]
-        store = utils.get_kv_store()
-        parameters = store[search_key].get("parameters", {})
-
-        if not utils.validate_search_parameters(parameters, include_location=False):
-            self._ask_place_type(dispatcher, tracker, parameters)
-        elif parameters.get("location") is None:
-            self._ask_location(dispatcher, tracker, parameters)
-
-        return []
-
-    def _ask_place_type(
-        self,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        parameters: dict[str, Any],
-    ) -> None:
-        invalid = utils.get_slot(tracker, "invalid_place_type", False)  # noqa: FBT003
-        if invalid:
+        error = utils.get_slot(tracker, "search_place_type_error")
+        if error:
             dispatcher.utter_message(response="utter_invalid_place_type")
         else:
             dispatcher.utter_message(response="utter_ask_place_type")
 
-    def _ask_location(  # noqa: PLR0912, C901
+        return []
+
+
+@utils.handle_action_exceptions
+class AskSearchLocation(Action):
+    """Action to ask the user for the search location."""
+
+    def name(self) -> str:
+        return "action_ask_search_location"
+
+    async def run(
         self,
         dispatcher: CollectingDispatcher,
         tracker: Tracker,
-        parameters: dict[str, Any],
-    ) -> None:
-        invalid = utils.get_slot(tracker, "invalid_location", None)
-        reasons = utils.get_slot(tracker, "invalid_location_reasons", [])
+        domain: DomainDict,
+    ) -> list[dict[str, Any]]:
+        error = utils.get_slot(tracker, "search_location_error")
 
-        place_type = parameters.get("place_type")
-        if place_type is not None:
+        place_type = utils.get_slot(tracker, "search_place_type")
+        activity = utils.get_slot(tracker, "search_activity")
+        if place_type:
             place_type = utils.pluralize(place_type)
-        elif parameters.get("activity") == "eat":
+        elif activity == "eat":
             place_type = "places to eat"
-        elif parameters.get("activity") == "drink":
+        elif activity == "drink":
             place_type = "places to have a drink"
         else:
             place_type = "places"
 
-        if not reasons:
-            # the user never provided a location for the search, but we may have
-            # already asked them for their location
-            asked_count = utils.count_action_inside_form(tracker, self.name())
-            open_now = parameters.get("open_now", False)
-            name = parameters.get("place_name")
+        if not error:
+            # the user never provided a location for the search
+            open_now = utils.get_slot(tracker, "search_open_now")
+            place_name = utils.get_slot(tracker, "search_place_name")
 
-            if asked_count > 2:
-                # the user has been asked for the location multiple times, but they
-                # never provided it, so we ask them if they want to stop the search
-                dispatcher.utter_message(response="utter_inform_how_stop_search")
-            elif open_now:
-                # if the user needs to find a place now, we should look for
-                # places near their location
-                response = "utter_ask_user_location"
-                if asked_count > 1:
-                    response += "_2"
-                dispatcher.utter_message(response=response, place_type=place_type)
-            elif name is not None:
-                # if the user is looking for a specific place, we should ask them
-                # for the location
-                response = "utter_ask_location_place_name"
-                if asked_count > 1:
-                    response += "_2"
-                dispatcher.utter_message(response=response, place_name=name)
+            if open_now:
+                dispatcher.utter_message(
+                    response="utter_ask_user_location", place_type=place_type
+                )
+            elif place_name:
+                dispatcher.utter_message(
+                    response="utter_ask_location_place_name", place_name=place_name
+                )
             else:
-                # if the user is looking for places for the future or just
-                # for information, we ask them for the location
-                response = "utter_ask_location"
-                if asked_count > 0:
-                    response += "_2"
-                dispatcher.utter_message(response=response, place_type=place_type)
-        elif reasons[-1] == "unknown_user_location":
-            # the user has stated that the search location should be their location
-            # but we don't know their location yet
+                dispatcher.utter_message(
+                    response="utter_ask_location", place_type=place_type
+                )
+        elif error[-1][0] == "unknown_user_location":
             dispatcher.utter_message(response="utter_need_user_location")
-        elif reasons[-1] == "ambiguous":
-            response = "utter_ambiguous_location"
-            dispatcher.utter_message(response=response, location=invalid)
+        elif error[-1][0] == "ambiguous":
+            dispatcher.utter_message(
+                response="utter_ambiguous_location", location=error[-1][1]
+            )
         else:
-            response = "utter_location_not_found"
-            dispatcher.utter_message(response=response, location=invalid)
+            dispatcher.utter_message(
+                response="utter_location_not_found", location=error[-1][1]
+            )
+
+        return []
+
+
+# --------------------------------------------------------------------------- #
+# Search-management Actions
+# --------------------------------------------------------------------------- #
 
 
 @utils.handle_action_exceptions
-class CheckSearchParameters(Action):
-    """Checks if all the required search parameters have been provided."""
+class StartSearch(Action):
+    """Action to start the search process."""
 
     def name(self) -> str:
-        return "action_check_search_parameters"
+        return "action_start_search"
 
     async def run(
         self,
@@ -340,21 +371,59 @@ class CheckSearchParameters(Action):
         domain: DomainDict,
     ) -> list[dict[str, Any]]:
         history = utils.get_slot(tracker, "search_history", [])
-        idx = utils.get_slot(tracker, "selected_searches")[0]
-        search = utils.get_kv_store()[history[idx]]
+        intents = utils.get_last_intents(tracker)
+        if any(intent.startswith("inform") for intent in intents):
+            # ther user is modifying an existing search
+            idx = utils.get_slot(tracker, "selected_searches", [])[0]
+            search = utils.get_kv_store().get_search(history[idx])
 
+            return [
+                SlotSet("search_location", utils.serialize(search.parameters.location)),
+                SlotSet("search_location_error", None),
+                SlotSet("search_place_type", search.parameters.place_type),
+                SlotSet("search_place_type_error", None),
+                SlotSet("search_place_name", search.parameters.place_name),
+                SlotSet("search_open_now", search.parameters.open_now),
+                SlotSet("search_meal_type", search.parameters.meal_type),
+                SlotSet("search_cuisine_type", search.parameters.cuisine_type),
+                SlotSet("search_activity", search.parameters.activity),
+                SlotSet("search_price_range", search.parameters.price_range),
+                SlotSet("search_quality", search.parameters.quality),
+            ]
+
+        # the user is creating a new search
+        history = history.copy()
+        history.append(None)
+
+        datetimes = utils.get_entity_values(tracker, "datetime")
+        suggest_booking = len(datetimes) > 0
+
+        dispatcher.utter_message(response="utter_start_search")
         return [
-            SlotSet(
-                "all_required_parameters_set",
-                utils.validate_search_parameters(search.get("parameters", {})),
-            )
+            SlotSet("search_history", history),
+            SlotSet("selected_searches", [len(history) - 1]),
+            SlotSet("selected_results", None),
+            SlotSet("search_location", None),
+            SlotSet("search_location_error", None),
+            SlotSet("search_place_type", None),
+            SlotSet("search_place_type_error", None),
+            SlotSet("search_place_name", None),
+            SlotSet("search_open_now", None),
+            SlotSet("search_meal_type", None),
+            SlotSet("search_cuisine_type", None),
+            SlotSet("search_activity", None),
+            SlotSet("search_price_range", None),
+            SlotSet("search_quality", None),
+            SlotSet("suggest_booking", suggest_booking),
         ]
 
 
 @utils.handle_action_exceptions
-class ShowSearchParameters(Action):
+class CreateSearch(Action):
+    """Action to create a search object."""
+
     def name(self) -> str:
-        return "action_show_search_parameters"
+        return "action_create_search"
 
     async def run(
         self,
@@ -363,43 +432,70 @@ class ShowSearchParameters(Action):
         domain: DomainDict,
     ) -> list[dict[str, Any]]:
         history = utils.get_slot(tracker, "search_history", [])
-        idx = utils.get_slot(tracker, "selected_searches")[0]
-        search = utils.get_kv_store()[history[idx]]
+        idx = utils.get_slot(tracker, "selected_searches", [])[0]
 
-        parameters = search.get("parameters", {})
-        if "place_type" in parameters:
-            place_type = utils.singularize(parameters["place_type"])
-        elif parameters.get("activity") == "eat":
-            place_type = "place where to eat"
-        elif parameters.get("activity") == "drink":
-            place_type = "place where to drink"
-        else:
-            place_type = "place"
+        location = utils.get_slot(tracker, "search_location")
+        location = utils.deserialize(places.Place, location)
 
-        msg = "Here are the search details:\n"
-        if "place_name" in parameters:
-            place_name = parameters["place_name"]
-            location = parameters["location"]["short_formatted_address"]
-            msg += (
-                f"- you are looking for a {place_type} called {place_name} "
-                f"near {location}"
-            )
-        else:
-            cusine_type = parameters.get("cuisine_type")
-            meal_type = parameters.get("meal_type")
-            msg += f"- you are looking for a {place_type}"
-            if meal_type is not None:
-                msg += f" for {meal_type}"
-            if cusine_type is not None:
-                msg += f" with {cusine_type} cuisine"
+        parameters = SearchParameters(
+            location=location,
+            place_type=utils.get_slot(tracker, "search_place_type"),
+            place_name=utils.get_slot(tracker, "search_place_name"),
+            open_now=utils.get_slot(tracker, "search_open_now"),
+            meal_type=utils.get_slot(tracker, "search_meal_type"),
+            cuisine_type=utils.get_slot(tracker, "search_cuisine_type"),
+            activity=utils.get_slot(tracker, "search_activity"),
+            price_range=utils.get_slot(tracker, "search_price_range"),
+            quality=utils.get_slot(tracker, "search_quality"),
+        )
 
-            location = parameters["location"]["short_formatted_address"]
-            msg += f" near {location}"
+        search = SearchData(parameters)
 
-        ranking = parameters.get("rank_by", "relevance")
-        msg += f"\n- the results are ranked by {ranking}"
-        dispatcher.utter_message(msg)
+        store = utils.get_kv_store()
+        if history[idx] is not None:
+            # the user was modifying an existing search
+            store.update_search(history[idx], search)
+            return []
 
+        # the user was starting a new search
+        history = history.copy()
+        history[idx] = store.add_search(search)
+
+        return [
+            SlotSet("search_history", history),
+            SlotSet("selected_searches", [idx]),
+            SlotSet("selected_searches_error", None),
+        ]
+
+
+@utils.handle_action_exceptions
+class CancelSearch(Action):
+    """Action to cancel the search process."""
+
+    def name(self) -> str:
+        return "action_cancel_search"
+
+    async def run(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> list[dict[str, Any]]:
+        history = utils.get_slot(tracker, "search_history", [])
+        idx = utils.get_slot(tracker, "selected_searches", [])[0]
+
+        if history[idx] is None:
+            # the user was starting a new search
+            dispatcher.utter_message(response="utter_cancel_search")
+            history = history.copy()
+            history.pop(idx)
+            return [
+                SlotSet("search_history", history),
+                SlotSet("selected_searches", []),
+            ]
+
+        # the user was modifying an existing search, so we don't need to do anything
+        dispatcher.utter_message(response="utter_cancel_modify_search")
         return []
 
 
@@ -424,38 +520,37 @@ class Search(Action):
         history = utils.get_slot(tracker, "search_history", []).copy()
         idx = utils.get_slot(tracker, "selected_searches")[0]
         store = utils.get_kv_store()
-        search = store[history[idx]]
-        prev_results = search.get("results")
+        search = store.get_search(history[idx])
 
-        results = await utils.find_places(search["parameters"])
+        results = await utils.find_places(search.parameters)
         if len(results) == 0:
-            if prev_results is None:
+            if search.results is None:
                 msg = "I couldn't find any places matching your search criteria. "
                 msg += "Try loosening them a bit."
-            elif len(prev_results) == 0:
+            elif len(search.results) == 0:
                 msg = "Sorry, but I still cannot find any places."
             else:
                 msg = "These new search criteria may be too restrictive because I "
                 msg += "cannot find any places satisfying them."
         elif len(results) == 1:
-            if prev_results is None:
+            if search.results is None:
                 msg = "I found only one place matching your search criteria: "
                 msg += utils.get_place_title(results[0])
-            elif len(prev_results) == 0:
+            elif len(search.results) == 0:
                 msg = "Well at least now I found one place: "
                 msg += utils.get_place_title(results[0])
-            elif len(prev_results) == 1:
+            elif len(search.results) == 1:
                 msg = "Even now, I found only one place: "
                 msg += utils.get_place_title(results[0])
             else:
                 msg = "Using these new search criteria, I found only one place: "
                 msg += utils.get_place_title(results[0])
         elif len(results) <= _PAGE_SIZE:
-            if prev_results is None:
+            if search.results is None:
                 msg = "Here are all the results I found:\n"
                 for i, result in enumerate(results, start=1):
                     msg += f"{i}. {utils.get_place_title(result)}\n"
-            elif len(prev_results) < len(results):
+            elif len(search.results) < len(results):
                 msg = "With these new search criteria, I found more results:\n"
                 for i, result in enumerate(results, start=1):
                     msg += f"{i}. {utils.get_place_title(result)}\n"
@@ -464,12 +559,12 @@ class Search(Action):
                 for i, result in enumerate(results, start=1):
                     msg += f"{i}. {utils.get_place_title(result)}\n"
         else:  # noqa: PLR5501
-            if prev_results is None:
+            if search.results is None:
                 msg = "I found multiple places matching your search criteria. "
                 msg += f"Here are the top {_PAGE_SIZE}:\n"
                 for i, result in enumerate(results[:_PAGE_SIZE], start=1):
                     msg += f"{i}. {utils.get_place_title(result)}\n"
-            elif len(prev_results) < len(results):
+            elif len(search.results) < len(results):
                 msg = f"Now I found many more places. Here are the top {_PAGE_SIZE}:\n"
                 for i, result in enumerate(results[:_PAGE_SIZE], start=1):
                     msg += f"{i}. {utils.get_place_title(result)}\n"
@@ -478,19 +573,29 @@ class Search(Action):
                 for i, result in enumerate(results[:_PAGE_SIZE], start=1):
                     msg += f"{i}. {utils.get_place_title(result)}\n"
 
-        dispatcher.utter_message(msg)
-        search["results"] = utils.serialize_iterable(results)
-        store[history[idx]] = search
+        search.results = results
+        store.update_search(history[idx], search)
 
-        return [SlotSet("selected_results", list(range(min(len(results), _PAGE_SIZE))))]
+        dispatcher.utter_message(msg)
+        events = [
+            SlotSet("selected_results", list(range(min(len(results), _PAGE_SIZE))))
+        ]
+        if (
+            len(results) == 1
+            and utils.get_slot(tracker, "suggest_booking")
+            and results[0].reservable
+        ):
+            events.append(FollowupAction("action_suggest_booking"))
+
+        return events
 
 
 @utils.handle_action_exceptions
-class RankResults(Action):
-    """Action to rank the search results."""
+class ChangeSearchRankBy(Action):
+    """Action to change the ranking of the search results."""
 
     def name(self) -> str:
-        return "action_rank_results"
+        return "action_change_search_rank_by"
 
     async def run(
         self,
@@ -499,7 +604,7 @@ class RankResults(Action):
         domain: DomainDict,
     ) -> list[dict[str, Any]]:
         rank_by = None
-        for intent in utils.get_intents(tracker):
+        for intent in utils.get_last_intents(tracker):
             match intent:
                 case "rank_results_by_relevance":
                     rank_by = "relevance"
@@ -520,49 +625,49 @@ class RankResults(Action):
         history = utils.get_slot(tracker, "search_history", [])
         idx = utils.get_slot(tracker, "selected_searches")[0]
         store = utils.get_kv_store()
-        search = store[history[idx]]
+        search = store.get_search(history[idx])
 
-        prev_rank_by = search["parameters"].get("rank_by", "relevance")
-        if prev_rank_by == rank_by:
+        if search.parameters.rank_by == rank_by:
             dispatcher.utter_message(
-                response="utter_already_ranked_by",
-                rank_by=rank_by,
+                response="utter_already_ranked_by", rank_by=rank_by
             )
             return []
 
-        search["parameters"]["rank_by"] = rank_by
+        search.parameters.rank_by = rank_by
 
-        prev_results = search.get("results", [])
-        if len(prev_results) < 2:
-            store[history[idx]] = search
+        if len(search.results or []) < 2:
+            store.update_search(history[idx], search)
             dispatcher.utter_message(response="utter_changed_rank_by", rank_by=rank_by)
             return []
 
-        results = await utils.find_places(search["parameters"], start_new_search=False)
+        results = await utils.find_places(search.parameters)
         if len(results) <= _PAGE_SIZE:
-            # there are no more results to retrieve
             msg = f"Here are all the results sorted by {rank_by}:"
         else:
-            # there are more results to retrieve
             msg = f"Here are the top {_PAGE_SIZE} results sorted by {rank_by}:"
+
         for i, result in enumerate(results[:_PAGE_SIZE], start=1):
             msg += f"\n{i}. {utils.get_place_title(result)}"
 
+        search.results = results
+        store.update_search(history[idx], search)
+
         dispatcher.utter_message(msg)
-        search["results"] = utils.serialize_iterable(results)
-        store[history[idx]] = search
 
         return [SlotSet("selected_results", list(range(min(len(results), _PAGE_SIZE))))]
 
 
+# --------------------------------------------------------------------------- #
+# Search parameters Actions
+# --------------------------------------------------------------------------- #
+
+
 @utils.handle_action_exceptions
-class SetSelectedResults(Action):
-    """Action to set the selected results."""
-
+class ShowSearchParameters(Action):
     def name(self) -> str:
-        return "action_set_selected_results"
+        return "action_show_search_parameters"
 
-    async def run(
+    async def run(  # noqa: C901, PLR0912
         self,
         dispatcher: CollectingDispatcher,
         tracker: Tracker,
@@ -570,74 +675,57 @@ class SetSelectedResults(Action):
     ) -> list[dict[str, Any]]:
         history = utils.get_slot(tracker, "search_history", [])
         idx = utils.get_slot(tracker, "selected_searches")[0]
-        search = utils.get_kv_store()[history[idx]]
+        search = utils.get_kv_store().get_search(history[idx])
 
-        if len(search.get("results", [])) == 0:
-            return [
-                SlotSet("selected_results", None),
-                SlotSet("selected_results_error", "no_results"),
-            ]
-
-        mentions = utils.get_entity_values(tracker, "mention")
-        if not mentions:
-            selected = utils.get_slot(tracker, "selected_results")
-            if selected is None:
-                results = search.get("results", [])
-                selected = list(range(min(len(results), _PAGE_SIZE)))
-
-            return [
-                SlotSet("selected_results", selected),
-                SlotSet("selected_results_error", None),
-            ]
-
-        selected, errors = await utils.resolve_mentions(
-            tracker,
-            selected=utils.get_slot(tracker, "selected_results", []),
-            num_entities=len(search.get("results", [])),
-            entity_type=["result", "place"],
-        )
-
-        if errors:
-            msg = "Sorry, but " + utils.join(errors, sep=", ", last_sep=" and ") + ".\n"
-            dispatcher.utter_message(text=msg)
-            return [SlotSet("selected_results_error", "wrong_indices")]
-
-        return [
-            SlotSet("selected_results", selected),
-            SlotSet("selected_results_error", None),
-        ]
-
-
-@utils.handle_action_exceptions
-class ShowSelectedResults(Action):
-    """Action to show the selected search results to the user."""
-
-    def name(self) -> str:
-        return "action_show_selected_results"
-
-    async def run(
-        self,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: DomainDict,
-    ) -> list[dict[str, Any]]:
-        history = utils.get_slot(tracker, "search_history", [])
-        idx = utils.get_slot(tracker, "selected_searches")[0]
-        search = utils.get_kv_store()[history[idx]]
-
-        results = search.get("results", [])
-        selected = utils.get_slot(tracker, "selected_results")
-
-        results = [results[i] for i in selected]
-        results = utils.deserialize_iterable(places.Place, results)
-        if len(results) == 1:
-            place = results[0]
-            msg = f"Here is the selected result:\n{utils.get_place_title(place)}"
+        if search.parameters.place_type:
+            place_type = utils.singularize(search.parameters.place_type)
+        elif search.parameters.activity == "eat":
+            place_type = "place where to eat"
+        elif search.parameters.activity == "drink":
+            place_type = "place where to drink"
         else:
-            msg = "Here are the selected results:\n"
-            for i, result in zip(selected, results, strict=True):
-                msg += f"{i + 1}. {utils.get_place_title(result)}\n"
+            place_type = "place"
 
+        location = search.parameters.location.short_formatted_address
+
+        msg = "Here are the search details:\n"
+        if search.parameters.place_name:
+            place_name = search.parameters.place_name
+            msg += (
+                f"- you are looking for a {place_type} called {place_name} "
+                f"near {location}"
+            )
+        else:
+            msg += f"- you are looking for a {place_type}"
+            if search.parameters.meal_type is not None:
+                msg += f" for {search.parameters.meal_type}"
+            if search.parameters.cuisine_type is not None:
+                msg += f" with {search.parameters.cuisine_type} cuisine"
+
+            msg += f" near {location}"
+
+        if search.parameters.open_now:
+            msg += f"\n- the {place_type} should be open now"
+
+        match search.parameters.quality:
+            case None | "any":
+                pass
+            case "excellent":
+                msg += f"\n- the {place_type} should have excellent reviews"
+            case "moderate":
+                msg += f"\n- the {place_type} should have good reviews"
+
+        match search.parameters.price_range:
+            case None | "any":
+                pass
+            case "expensive":
+                msg += f"\n- the {place_type} should be expensive"
+            case "moderate":
+                msg += f"\n- the {place_type} should be moderately priced"
+            case "inexpensive":
+                msg += f"\n- the {place_type} should be inexpensive"
+
+        msg += f"\n- the results are ranked by {search.parameters.rank_by}"
         dispatcher.utter_message(msg)
 
         return []

@@ -1,0 +1,38 @@
+version: "3.1"
+
+rules:
+
+- rule: ask the user how can help when the user asks for help
+  steps:
+  - intent: help
+  - action: utter_help
+
+- rule: ask the user how can help when the user asks for help
+  steps:
+  - action: utter_ask_further_help
+  - intent: affirm
+  - action: utter_ask_help
+
+- rule: ask the user how can help when the user asks for help (2)
+  steps:
+  - action: utter_ask_further_help_2
+  - intent: affirm
+  - action: utter_ask_help
+
+- rule: say goodbye whenever the user does no longer need help
+  steps:
+  - action: utter_ask_further_help
+  - or:
+    - intent: deny
+    - intent: stop
+  - action: utter_goodbye_no_help
+  - action: action_session_start
+
+- rule: say goodbye whenever the user does no longer need help (2)
+  steps:
+  - action: utter_ask_further_help_2
+  - or:
+    - intent: deny
+    - intent: stop
+  - action: utter_goodbye_no_help
+  - action: action_session_start

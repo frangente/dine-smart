@@ -1,0 +1,143 @@
+version: "3.1"
+
+rules:
+
+# --------------------------------------------------------------------------- #
+# SUGGEST BOOKING
+# --------------------------------------------------------------------------- #
+
+- rule: start booking if the user accepts the suggestion to book a place
+  steps:
+  - action: action_suggest_booking
+  - or:
+    - intent: affirm
+    - intent: continue
+  - action: action_start_booking
+  - action: booking_form
+  - active_loop: booking_form
+
+- rule: asks for further help if the user denies the suggestion to book a place
+  steps:
+  - action: action_suggest_booking
+  - or:
+    - intent: deny
+    - intent: stop
+  - action: utter_ask_further_help_2
+
+# --------------------------------------------------------------------------- #
+# BOOKING FORM
+# --------------------------------------------------------------------------- #
+
+- rule: starts a booking form when the user wants to book
+  steps:
+  - intent: book_result
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: one
+  - action: action_set_selected_results
+  - slot_was_set:
+    - selected_results_error: null
+  - action: action_count_selected_results
+  - slot_was_set:
+    - selected_results_count: one
+  - action: action_check_is_reservable
+  - slot_was_set:
+    - is_reservable: true
+  - action: action_start_booking
+  - action: booking_form
+  - active_loop: booking_form
+
+- rule: state that the result is not reservable
+  steps:
+  - action: action_check_is_reservable
+  - slot_was_set:
+    - is_reservable: false
+  - action: action_state_not_reservable
+
+- rule: create the booking when all slots are filled and the user confirms
+  condition:
+  - active_loop: booking_form
+  steps:
+  - action: booking_form
+  - active_loop: null
+  - slot_was_set:
+    - requested_slot: null
+  - action: action_confirm_booking
+  - or:
+    - intent: affirm
+    - intent: continue
+  - action: action_create_booking
+  - action: utter_ask_further_help
+
+- rule: cancel the booking when all slots are filled and the user denies
+  condition:
+  - active_loop: booking_form
+  steps:
+  - action: booking_form
+  - active_loop: null
+  - slot_was_set:
+    - requested_slot: null
+  - action: action_confirm_booking
+  - or:
+    - intent: deny
+    - intent: stop
+  - action: action_cancel_booking
+  - action: utter_ask_further_help
+
+- rule: the user wants to start the booking but no search is selected
+  steps:
+  - intent: book_result
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: zero
+  - action: utter_ask_specify_search_first
+
+- rule: the user wants to start the booking but multiple searches are selected
+  steps:
+  - intent: book_result
+  - action: action_count_selected_searches
+  - slot_was_set:
+    - selected_searches_count: multiple
+  - action: utter_ask_specify_search_first
+
+# --------------------------------------------------------------------------- #
+# MODIFY BOOKING
+# --------------------------------------------------------------------------- #
+
+- rule: activate booking form when the user wants to modify an existing booking
+  condition:
+  - active_loop: null
+  steps:
+  - intent: inform_booking
+  - action: action_count_selected_bookings
+  - slot_was_set:
+    - selected_bookings_count: one
+  - action: action_check_future_booking
+  - slot_was_set:
+    - is_future_booking: true
+  - action: action_start_booking
+  - action: booking_form
+  - active_loop: booking_form
+
+- rule: inform that they cannot modify a past booking
+  steps:
+  - intent: inform_booking
+  - action: action_count_selected_bookings
+  - slot_was_set:
+    - selected_bookings_count: one
+  - action: action_check_future_booking
+  - slot_was_set:
+    - is_future_booking: false
+  - action: utter_cannot_modify_past_booking
+
+# --------------------------------------------------------------------------- #
+# BOOKING PARAMETERS
+# --------------------------------------------------------------------------- #
+
+- rule: the user asks for the booking parameters of the current booking
+  steps:
+  - intent: show_booking_details
+  - action: action_count_selected_bookings
+  - slot_was_set:
+    - selected_bookings_count: one
+  - action: action_show_booking_details
