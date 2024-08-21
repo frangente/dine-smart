@@ -38,7 +38,9 @@ By default, in the configuration the SpellChecker and SemanticChecker components
 
 To run the action server, you need to the `GOOGLE_MAPS_API_KEY` environment variable to your Google Maps API key. This is mandatory since the assistant uses the Google Maps API to verifies the locations provided by the user and to search for venues. Optionally, you can also set the `GOOGLE_GEMINI_API_KEY` environment variable to your Google Gemini API key. This is used as a nice-to-have feature when the user inputs an out-of-scope query; if this variable is set, the assistant will inform the user that it cannot handle the request but it will also provide the response from the Google Gemini API (if not set, the assistant will simply inform the user that it cannot handle the request).
 
-After training the assistant and setting the environment variables, you can run the assistant using the following commands:
+Make also sure to be running a Duckling server, since the assistant uses the Duckling HTTP API to extract entities from the user's input. The server should be running on `http://localhost:8000`.
+
+After training the assistant and setting the environment, you can run the assistant using the following commands:
 
 ```bash
 # to run the rasa server
